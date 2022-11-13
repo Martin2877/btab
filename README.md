@@ -8,7 +8,7 @@ BTAB (Blue Team Analyisis Box) 是一个开源蓝队分析工具箱，辅助安�
 
 ## 介绍
 
-
+[btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
 
 ## 功能界面
 
