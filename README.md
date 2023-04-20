@@ -2,9 +2,11 @@
 
 Blue team analyisis box is a tool for blue team security analyisis.
 
-BTAB (Blue Team Analyisis Box) 是一个开源蓝队分析工具箱，辅助安全运营人员的流量分析、木马分析等场景，目前已集成流量包检测、SQL注入检测、Webshell 检测、bash命令执行检测等工具。
+BTAB (Blue Team Analyisis Box) 是一个蓝队分析工具箱，专注于攻击特征分析。可以辅助安全运营人员的流量包分析、木马分析等场景，目前已集成流量包检测、SQL注入检测、Webshell检测、bash命令执行检测，以及解码序列化等工具。
 
-> *内测中*
+## 下载
+
+[前往releases下载](https://github.com/Martin2877/btab/releases)
 
 ## 介绍
 
