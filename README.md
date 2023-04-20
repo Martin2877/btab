@@ -12,14 +12,15 @@ Blue team analyisis box is a tool for blue team security analyisis.
 
 初版本主要实现基本的功能和整体流程，主要包含以下三块功能：
 
-威胁仓库：
+1. 威胁仓库：
 用于存储流量包、payload文件、webshell文件的列表；
 
-风险检测：
+2. 风险检测：
 包括流量包检测、HTTP深度解析、SQLi检测、XSS检测等检测项；
 
-辅助工具：
+3. 辅助工具：
 包括 jq 、反序列化解析、数据加解密等处理工具；
+
 
 ## 议题分享文档
 
