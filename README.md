@@ -6,7 +6,7 @@ Blue team analyisis box is a tool for blue team security analyisis.
 
 ## 下载与使用
 
-[前往releases下载](https://github.com/Martin2877/btab/releases)，双击执行即可。
+[前往releases下载](https://github.com/Martin2877/btab/releases)，双击执行即可。启动后访问本地的 8001 端口： http://localhost:8001
 
 ## 功能
 
