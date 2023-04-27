@@ -50,4 +50,8 @@ Blue team analyisis box is a tool for blue team security analyisis.
 
 <img src="https://user-images.githubusercontent.com/26109420/233270399-57c74ce3-a093-4321-8d1c-1cd701702ed6.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233270423-d3e859b0-c3eb-4b90-88b7-74e523e84984.jpg" alt=" Edge" width="180px" height="230px" />
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/Martin2877/btab.svg)](https://starchart.cc/Martin2877/btab)
+
 
