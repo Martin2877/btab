@@ -7,6 +7,10 @@ Blue team analyisis box is a tool for blue team security analyisis.
 
 [BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) 是一个蓝队分析工具箱，专注于攻击特征分析。可以辅助安全运营人员在客户现场较苛刻环境下(无网、无python环境)的流量包分析、木马分析等场景，目前已集成流量包检测、SQL注入检测、Webshell检测、bash命令执行检测，以及解码序列化等工具。
 
+## 议题分享文档
+
+[btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
+
 ## 下载与使用
 
 [前往releases下载](https://github.com/Martin2877/btab/releases)，双击执行即可。启动后访问本地的 8001 端口： http://localhost:8001
@@ -26,6 +30,30 @@ Blue team analyisis box is a tool for blue team security analyisis.
 3. 辅助工具：
 包括 jq 、反序列化解析、数据加解密等处理工具；
 
+## 功能使用说明
+
+### 流量包检测功能
+
+需要有 tshark 依赖，注意需要配置 `config.yaml` 文件中指定 tshark 路径，如下：
+
+```
+pcapAnalyseConfig:
+    # tsharkPath: tshark  # unix 环境
+    tsharkPath: C:\Program Files\Wireshark\tshark.exe # win 环境
+```
+
+### webshell 检测功能
+
+需要有 java 依赖。
+
+## 功能界面截图
+
+<img width="1667" alt="image" src="https://user-images.githubusercontent.com/26109420/201511711-b395343b-e403-468e-9534-29abb1993247.png">
+
+<img width="1679" alt="image" src="https://user-images.githubusercontent.com/26109420/201511731-01943065-a9ac-46b0-96ce-f8626f1a231f.png">
+
+<img width="1671" alt="image" src="https://user-images.githubusercontent.com/26109420/201511741-4ba91fd4-0890-44b5-a069-1660f1d5cd81.png">
+
 ## 技术栈
 
 | 模块 | 技术 | 备注 |
@@ -36,18 +64,6 @@ Blue team analyisis box is a tool for blue team security analyisis.
 | 后端API | gin |  |
 | 流量包检测逻辑 | python | 使用 go embed 嵌入实现 |
 | java类检测引擎 | java | 使用 go embed 嵌入实现 |
-
-## 议题分享文档
-
-[btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
-
-## 功能界面截图
-
-<img width="1667" alt="image" src="https://user-images.githubusercontent.com/26109420/201511711-b395343b-e403-468e-9534-29abb1993247.png">
-
-<img width="1679" alt="image" src="https://user-images.githubusercontent.com/26109420/201511731-01943065-a9ac-46b0-96ce-f8626f1a231f.png">
-
-<img width="1671" alt="image" src="https://user-images.githubusercontent.com/26109420/201511741-4ba91fd4-0890-44b5-a069-1660f1d5cd81.png">
 
 ## 交流
 
