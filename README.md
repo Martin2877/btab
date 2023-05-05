@@ -26,6 +26,17 @@ Blue team analyisis box is a tool for blue team security analyisis.
 3. 辅助工具：
 包括 jq 、反序列化解析、数据加解密等处理工具；
 
+## 技术栈
+
+| 模块 | 技术 | 备注 |
+| ----- | ----- | ----- |
+| 前端框架 | vue |  |
+| 前端UI框架 | naive ui |  |
+| 后端语言 | golang |  |
+| 后端API | gin |  |
+| 流量包检测逻辑 | python | 使用 go embed 嵌入实现 |
+| java类检测引擎 | java | 使用 go embed 嵌入实现 |
+
 ## 议题分享文档
 
 [btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
