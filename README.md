@@ -7,10 +7,10 @@ Blue team analyisis box is a tool for blue team security analyisis.
 
 [BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) is a Blue team analyisis box，focusing on attack signature analysis。It can assist security operation personnel in scenarios such as traffic packet analysis and Trojan horse analysis in the harsh environment of the customer site (no network, no python environment). Currently, it has integrated traffic packet detection, SQL injection detection, Webshell detection, bash command execution detection, and Decoding serialization and other tools.
 
-<a>English</a>
+<a>English</a> - 
 <a href="./README_zh-cn.md">简体中文</a>
 
-## slices
+## slides
 
 [btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
 
@@ -87,12 +87,6 @@ Requires java dependency.
 You can join the group chat or add my [Ali0th](https://github.com/Martin2877) friend to enter the group chat.
 
 <img src="https://user-images.githubusercontent.com/26109420/233271729-b0d8644f-2538-40ae-8bde-abeb1187c5bb.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233271942-aeccc557-da89-4e6e-9e4b-60cc885e141e.jpg" alt=" Edge" width="180px" height="230px" />
-
-## sponsorship
-
-If you think this project has helped you, you can buy a glass of juice for the author to express your encouragement 🍹.
-
-<img src="https://user-images.githubusercontent.com/26109420/233270399-57c74ce3-a093-4321-8d1c-1cd701702ed6.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233270423-d3e859b0-c3eb-4b90-88b7-74e523e84984.jpg" alt=" Edge" width="180px" height="230px" />
 
 ## Stargazers over time
 

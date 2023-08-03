@@ -88,12 +88,6 @@ pcapAnalyseConfig:
 
 <img src="https://user-images.githubusercontent.com/26109420/233271729-b0d8644f-2538-40ae-8bde-abeb1187c5bb.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233271942-aeccc557-da89-4e6e-9e4b-60cc885e141e.jpg" alt=" Edge" width="180px" height="230px" />
 
-## 赞助
-
-如果你觉得这个项目帮助到了你，你可以帮作者买一杯果汁表示鼓励 🍹。
-
-<img src="https://user-images.githubusercontent.com/26109420/233270399-57c74ce3-a093-4321-8d1c-1cd701702ed6.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233270423-d3e859b0-c3eb-4b90-88b7-74e523e84984.jpg" alt=" Edge" width="180px" height="230px" />
-
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/Martin2877/btab.svg)](https://starchart.cc/Martin2877/btab)
