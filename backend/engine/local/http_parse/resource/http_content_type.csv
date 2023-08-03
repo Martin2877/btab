@@ -1,0 +1,16 @@
+application/json,json
+application/pdf,pdf
+application/octet-stream,file
+multipart/form-data,upload_file
+application/x-www-form-urlencoded,form_kv
+text/css,css
+text/xml,xml
+application/xml,xml
+text/plain,text
+application/x-javascript,js
+application/javascript,js
+text/html,html
+image/jpeg,jpg
+image/png,png
+image/gif,gif
+image/svg+xml,svg
