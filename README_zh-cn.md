@@ -18,7 +18,7 @@ Btab 在线版本，内测中，如需试用请加群，新能力正逐步添加
 
 > 功能目录
 
-<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/d4f97f58-3bae-49bc-bf5e-554c5da5d087">
+<img width="500" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/d4f97f58-3bae-49bc-bf5e-554c5da5d087">
 
 > 流量包检测
 
@@ -26,7 +26,7 @@ Btab 在线版本，内测中，如需试用请加群，新能力正逐步添加
 
 > webshell 检测
 
-<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/bfa74b0a-bcdc-4145-b44d-277fd7e643f0">
+<img width="500" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/bfa74b0a-bcdc-4145-b44d-277fd7e643f0">
 
 > poc 生成
 
