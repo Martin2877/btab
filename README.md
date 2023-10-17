@@ -10,11 +10,33 @@ Blue team analyisis box is a tool for blue team security analyisis.
 <a>English</a> - 
 <a href="./README_zh-cn.md">简体中文</a>
 
+## 🔥 *Btab Online*
+
+The online version of Btab is in internal testing. If you want to try it out, please join the group. New capabilities are being gradually added.
+
+Because the local version has many restrictions and the porting speed is slow, the current research results are integrated into the online version first, which currently covers pcap detection (static detection, logic detection), webshell detection, command execution detection, chatGPT generates POC, chatGPT generates suricata IDS Rules etc.
+
+> apps
+
+<img width="500" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/d4f97f58-3bae-49bc-bf5e-554c5da5d087">
+
+> pcap analyse
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/cb963da4-4170-4b4a-9916-b152733e9d27">
+
+> webshell detection
+
+<img width="500" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/bfa74b0a-bcdc-4145-b44d-277fd7e643f0">
+
+> poc generation
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/c8244a05-a275-44c8-ad4a-9533ff14193d">
+
 ## slides
 
 [btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
 
-## download
+## Btab local tool download
 
 [ahead for releases](https://github.com/Martin2877/btab/releases)，Double-click to execute. Access the local port 8001 after startup： http://localhost:8001
 
