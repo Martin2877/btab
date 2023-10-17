@@ -10,7 +10,7 @@ Blue team analyisis box is a tool for blue team security analyisis.
 <a href="./README.md">English</a> -
 <a>简体中文</a>
 
-## *Btab Online*
+## 🔥*Btab Online*
 
 Btab 在线版本，内测中，如需试用请加群，新能力正逐步添加中。
 
