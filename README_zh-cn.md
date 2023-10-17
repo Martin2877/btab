@@ -10,11 +10,30 @@ Blue team analyisis box is a tool for blue team security analyisis.
 <a href="./README.md">English</a> -
 <a>简体中文</a>
 
-## 议题分享文档
+## *Btab Online*
 
-[btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
+Btab 在线版本，内测中，如需试用请加群，新能力正逐步添加中。
 
-## 下载与使用
+因为本地版本限制较多，移植速度较慢，目前研究成果优先集成到在线版本中，目前已经覆盖 pcap 检测（静态检测、逻辑检测）、webshell 检测、命令执行检测、chatGPT 生成 POC、chatGPT 生成 suricata IDS 规则等。
+
+> 功能目录
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/d4f97f58-3bae-49bc-bf5e-554c5da5d087">
+
+> 流量包检测
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/cb963da4-4170-4b4a-9916-b152733e9d27">
+
+> webshell 检测
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/bfa74b0a-bcdc-4145-b44d-277fd7e643f0">
+
+> poc 生成
+
+<img width="800" alt="image" src="https://github.com/Martin2877/btab/assets/26109420/c8244a05-a275-44c8-ad4a-9533ff14193d">
+
+
+## Btab 本地工具下载与使用
 
 [前往releases下载](https://github.com/Martin2877/btab/releases)，双击执行即可。启动后访问本地的 8001 端口： http://localhost:8001
 
@@ -67,6 +86,10 @@ pcapAnalyseConfig:
 | 后端API | gin |  |
 | 流量包检测逻辑 | python | 使用 go embed 嵌入实现 |
 | java类检测引擎 | java | 使用 go embed 嵌入实现 |
+
+## 议题分享文档
+
+[btab蓝队分析工具箱-ali0th-v1.0.pdf](btab蓝队分析工具箱-ali0th-v1.0.pdf)
 
 ## Q&A
 
