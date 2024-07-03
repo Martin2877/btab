@@ -215,7 +215,7 @@ type Plugin interface {
 
 ## 更新日志
 
-### 第二版本
+### v0.5.x
 
 第一版本实现大体的框架，但为了实现无依赖导致整体打包困难、体积较大，且扩展能力不足等问题，第二部版本需要进行优化。通过 DSL 语法和 python jupyter 增加分析能力，通过 grpc 实现扩展能力。
 
@@ -225,7 +225,7 @@ type Plugin interface {
 - [x] jupyter分析流量包功能
 - [x] grpc 实现
 
-### 第一版本
+### v0.3.x
 
 - [x] 基本框架实现
 

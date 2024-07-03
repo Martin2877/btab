@@ -215,7 +215,7 @@ You can join the group chat or add my [Ali0th](https://github.com/Martin2877) fr
 
 ## Update log
 
-### Second version
+### v0.5.x
 
 The first version implements the general framework, but in order to achieve no dependency, the overall packaging is difficult, the volume is large, and the expansion capability is insufficient. The second version needs to be optimized. The analysis capability is increased through DSL syntax and python jupyter, and the expansion capability is achieved through grpc.
 
@@ -225,7 +225,7 @@ The first version implements the general framework, but in order to achieve no d
 - [x] Jupyter traffic packet analysis function
 - [x] grpc implementation
 
-### First version
+### v0.3.x
 
 - [x] Basic framework implementation
 

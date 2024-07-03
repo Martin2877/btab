@@ -54,7 +54,7 @@ const ConfigFileName = "config.yaml"
 const ServiceName = "blue-team-analysis-box"
 const Website = "https://github.com/Martin2877"
 
-const Version = "0.3.2"
+const Version = "0.5.0"
 const Banner = `
  ██████   ██████████     ██     ██████  
 ░█░░░░██ ░░░░░██░░░     ████   ░█░░░░██ 
