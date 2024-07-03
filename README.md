@@ -27,8 +27,8 @@ Blue team analyisis box is a tool for blue team security analyisis.
   - [Q\&A](#qa)
   - [comminicate](#comminicate)
   - [Update log](#update-log)
-    - [Second version](#second-version)
-    - [First version](#first-version)
+    - [v0.5.x](#v05x)
+    - [v0.3.x](#v03x)
   - [Stargazers over time](#stargazers-over-time)
 
 ## items

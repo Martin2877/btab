@@ -16,13 +16,15 @@ In the research process, it was also found that many products such as splunk and
 
 ![](2022-11-25-20-13-39.png)
 
-### 查询功能使用示例
+### Query function usage examples
 
-1. 数据提取与处理
+1. Data extraction and processing
 
-1.1 查询流量包数据
+1.1 Query traffic package data
 
-通过在流量包上传页面上传流量包后,则可以通过 pcap 模块, 获取流量包的数据.```shell
+After uploading the traffic package on the traffic package upload page, you can obtain the traffic package data through the pcap module.
+
+```shell
 // Pull data
 | pcap
 |: file log4j_test.pcap
@@ -189,7 +191,9 @@ len(results)
 
 The page is displayed as follows:
 
-2. Graphical analysis (example only)
+![analyse](./Snipaste_2024-07-03_19-18-35.jpg)
+
+1. Graphical analysis (example only)
 
 At the same time, during the analysis process, we will encounter scenarios that require graphical analysis, such as timing analysis. Here we take [S7_ssh slow connection_beta] as an example.
 

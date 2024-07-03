@@ -27,8 +27,8 @@ Blue team analyisis box is a tool for blue team security analyisis.
   - [Q\&A](#qa)
   - [交流](#交流)
   - [更新日志](#更新日志)
-    - [第二版本](#第二版本)
-    - [第一版本](#第一版本)
+    - [v0.5.x](#v05x)
+    - [v0.3.x](#v03x)
   - [趋势](#趋势)
 
 ## 文档跳转
