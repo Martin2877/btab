@@ -5,13 +5,18 @@ import (
 	"github.com/Martin2877/blue-team-box/pkg/conf"
 	"github.com/Martin2877/blue-team-box/pkg/file"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
+	//"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+)
+
+const (
+	DefaultDb = "btab.db"
 )
 
 var GlobalDB *gorm.DB
@@ -53,7 +58,7 @@ func Setup() {
 				log.Fatalf("db.Setup, fail to get current path: %v", err)
 			}
 			//配置文件路径 当前文件夹 + config.yaml
-			defaultSqliteFile := path.Join(dir, "btab.db")
+			defaultSqliteFile := path.Join(dir, DefaultDb)
 			// 检测 sqlite 文件是否存在
 			if !file.Exists(defaultSqliteFile) {
 				log.Fatalf("db.Setup err: btab.db not exist")

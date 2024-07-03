@@ -1,0 +1,21 @@
+syntax = "proto3";
+package rpc;
+
+option go_package = "./";
+
+import 'msg.proto';
+
+// The btab service definition.
+service BTAB {
+  // Sends a greeting
+  rpc Ping (PingRequest) returns (PingReply) {}
+}
+
+// The request message containing the user's name.
+message PingRequest {
+}
+
+// The response message containing the greetings
+message PingReply {
+  ResponseType message = 1;
+}

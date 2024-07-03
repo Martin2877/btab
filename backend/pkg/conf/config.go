@@ -3,12 +3,13 @@ package conf
 import (
 	"bytes"
 	"fmt"
-	"github.com/Martin2877/blue-team-box/pkg/file"
-	"github.com/spf13/viper"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"path"
+
+	"github.com/Martin2877/blue-team-box/pkg/file"
+	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 type Headers struct {
@@ -36,11 +37,6 @@ type EngineConfig struct {
 	Bash_Host       string `mapstructure:"bash_host"`
 }
 
-type PRSConfig struct {
-	Host  string `mapstructure:"host"`
-	Token string `mapstructure:"token"`
-}
-
 type GRPCConfig struct {
 	Address string `mapstructure:"address"`
 }
@@ -51,7 +47,6 @@ type Config struct {
 	EngineConfig      EngineConfig      `mapstructure:"engineConfig"`
 	ServerConfig      ServerConfig      `mapstructure:"serverConfig"`
 	LogConfig         LogConfig         `mapstructure:"logConfig"`
-	PRSConfig         []PRSConfig       `mapstructure:"prsConfig"`
 	GRPCConfig        GRPCConfig        `mapstructure:"grpcConfig"`
 	PcapAnalyseConfig PcapAnalyseConfig `mapstructure:"pcapAnalyseConfig"`
 }

@@ -2,6 +2,7 @@ package entry
 
 import (
 	"fmt"
+	"github.com/Martin2877/blue-team-box/pkg/proto"
 	"log"
 	"os"
 	"path"
@@ -81,6 +82,8 @@ func RunApp() {
 func RunServer(c *cli.Context) error {
 	InitAll()
 	HotConf()
+	// 运行 grpc
+	go proto.RunGRPCServer()
 	// 运行 web
 	port := c.String("port")
 	routers.InitRouter(port)

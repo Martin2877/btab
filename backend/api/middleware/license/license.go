@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const DateLine = "2024-10-01T08:18:46+08:00"
+const DateLine = "2025-10-01T08:18:46+08:00"
 
 func License() gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -1,0 +1,87 @@
+syntax = "proto3";
+package rpc;
+
+option go_package = "./";
+
+import 'msg.proto';
+
+// The greeting service definition.
+service Search {
+  // Sends a greeting
+  rpc SetPRS (SetPRSRequest) returns (SetPRSReply) {}
+  rpc CheckConnection (CheckConnectionRequest) returns (CheckConnectionReply) {}
+  rpc SetDateRange (SetDateRangeRequest) returns (SetDateRangeReply) {}
+  rpc SetVersion (SetVersionRequest) returns (SetVersionReply) {}
+  rpc Submit (SubmitRequest) returns (SubmitReply) {}
+  rpc Save (SaveRequest) returns (SaveReply) {}
+  rpc SubmitByName (SubmitByNameRequest) returns (SubmitByNameReply) {}
+}
+
+// The request message containing the user's name.
+message SetPRSRequest {
+  string host = 1;
+  string token = 2;
+}
+// The response message containing the greetings
+message SetPRSReply {
+  ResponseType message = 1;
+}
+
+// The request message containing the user's name.
+message CheckConnectionRequest {
+}
+// The response message containing the greetings
+message CheckConnectionReply {
+  ResponseType message = 1;
+}
+
+// The request message containing the user's name.
+message SetDateRangeRequest {
+  int64 dateStart = 1;
+  int64 dateEnd = 2;
+}
+
+// The response message containing the greetings
+message SetDateRangeReply {
+  ResponseType message = 1;
+}
+
+// The request message containing the user's name.
+message SetVersionRequest {
+  int64 version = 1;
+}
+
+// The response message containing the greetings
+message SetVersionReply {
+  ResponseType message = 1;
+}
+
+
+// The request message containing the user's name.
+message SubmitRequest {
+  string content = 1;
+}
+// The response message containing the greetings
+message SubmitReply {
+  ResponseType message = 1;
+}
+
+// The request message containing the user's name.
+message SaveRequest {
+  string name = 1;
+  string content = 2;
+}
+// The response message containing the greetings
+message SaveReply {
+  ResponseType message = 1;
+}
+
+// The request message 
+message SubmitByNameRequest {
+  string name = 1;
+}
+// The response message
+message SubmitByNameReply {
+  ResponseType message = 1;
+}
+

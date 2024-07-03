@@ -3,7 +3,7 @@ package jq
 import (
 	"encoding/json"
 	"errors"
-
+	"fmt"
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/itchyny/gojq"
 	"github.com/tidwall/gjson"
@@ -55,7 +55,7 @@ func (plugin *JQ) Exec() error {
 	if err != nil {
 		plugin.State = db.StateFinish
 		plugin.FinalStatus = db.FinalStatusFailed
-		return err
+		return errors.New(fmt.Sprintln("jq处理错误:", err.Error()))
 	}
 	// 加载 json 内容
 	var result []interface{}
@@ -66,7 +66,10 @@ func (plugin *JQ) Exec() error {
 			break
 		}
 		if err, ok := v.(error); ok {
-			return err
+			if err, ok := err.(*gojq.HaltError); ok && err.Value() == nil {
+				break
+			}
+			return errors.New(fmt.Sprintln("加载json内容错误:", err.Error()))
 		}
 		result = append(result, v)
 	}
@@ -76,8 +79,9 @@ func (plugin *JQ) Exec() error {
 	var resultJsonByte []byte
 	if len(result) == 1 {
 		resultJsonByte, _ = json.Marshal(result[0])
+	} else {
+		resultJsonByte, _ = json.Marshal(result)
 	}
-	resultJsonByte, _ = json.Marshal(result)
 	plugin.Result = gjson.ParseBytes(resultJsonByte).String()
 	return nil
 }

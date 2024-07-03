@@ -201,7 +201,7 @@ func InitRouter(port string) {
 		}
 	}
 
-	fmt.Println("server start at port:", port)
+	fmt.Printf("server start at port :%s\n", port)
 	fmt.Println("查看 web 可通过访问：", address)
 	err = router.Run(":" + port)
 	if err != nil {

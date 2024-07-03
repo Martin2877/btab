@@ -1,0 +1,12 @@
+syntax = "proto3";
+package rpc;
+
+option go_package = "./";
+
+// API Response 基础序列化器
+message ResponseType {
+	  int64  Code = 1;
+    string Message = 2;
+    string Result = 3;
+    string Type  = 4;
+}

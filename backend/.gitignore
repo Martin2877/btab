@@ -153,5 +153,10 @@ vendor/
  
 .idea
 *.xml
- 
- 
+
+ test
+ vendor
+.ipynb_checkpoints
+pack.bat
+config.yaml
+btab.sqlite

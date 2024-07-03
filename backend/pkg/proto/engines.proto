@@ -1,0 +1,57 @@
+syntax = "proto3";
+package rpc;
+option go_package = "./";
+
+import 'msg.proto';
+
+// The greeting service definition.
+service Engines {
+  rpc CheckAlive (CheckAliveRequest) returns (CheckAliveReply) {}
+  rpc Set (SetRequest) returns (SetReply) {}
+  rpc Get (GetRequest) returns (GetReply) {}
+  rpc Run (RunRequest) returns (RunReply) {}
+}
+
+// The response message containing the greetings
+message CheckAliveRequest {
+  
+}
+
+// The response message containing the greetings
+message CheckAliveReply {
+  ResponseType message = 1;
+}
+
+// The request message containing the user's name.
+message SetRequest {
+  string name = 1;
+  string content = 2;
+}
+
+// The response message containing the greetings
+message SetReply {
+  ResponseType message = 1;
+}
+
+
+// The request message containing the user's name.
+message GetRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message GetReply {
+  ResponseType message = 1;
+}
+
+
+// The request message containing the user's name.
+message RunRequest {
+  string content = 1;
+}
+
+// The response message containing the greetings
+message RunReply {
+  ResponseType message = 1;
+}
+

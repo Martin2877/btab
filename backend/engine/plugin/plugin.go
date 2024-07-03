@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Martin2877/blue-team-box/engine/plugin/SerializationDumper"
 	"github.com/Martin2877/blue-team-box/engine/plugin/jq"
+	"github.com/Martin2877/blue-team-box/engine/plugin/pcap"
 )
 
 type Plugin interface {
@@ -23,7 +24,7 @@ func init() {
 	// .. 在这里补充
 	PluginMap["jq"] = &jq.JQ{}
 	PluginMap["SerializationDumper"] = &SerializationDumper.SerializationDumper{}
-
+	PluginMap["pcap"] = &pcap.Pcap{}
 }
 
 type Plugins struct {
