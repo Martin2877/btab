@@ -1,12 +1,15 @@
 ## Investigation and Analysis Function Description
 
+<a>English</a> - 
+<a href="./README_zh-cn.md">简体中文</a>
+
 ### Description
 
 The investigation and analysis function is mainly to connect various data source interfaces, various processing engines, and processing processes, and use the pipeline data processing process to finally obtain the target data.
 
 ### Concept
 
-1. Pipeline data processing process
+- Pipeline data processing process
 
 In Unix-like operating systems, a pipeline is a series of processes that link standard input and output, where the output of each process is directly used as the input of the next process. Each link is implemented by an anonymous pipe. The components in the pipeline are also called filters. This concept was invented by Douglas McIlroy for the Unix command line and is named because of its similarity to physical pipelines.
 
@@ -193,7 +196,7 @@ The page is displayed as follows:
 
 ![analyse](./Snipaste_2024-07-03_19-18-35.jpg)
 
-1. Graphical analysis (example only)
+2. Graphical analysis (example only)
 
 At the same time, during the analysis process, we will encounter scenarios that require graphical analysis, such as timing analysis. Here we take [S7_ssh slow connection_beta] as an example.
 
