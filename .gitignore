@@ -183,7 +183,7 @@ config.yaml
 btab.sqlite
 test
 __pycache__
-./backend/test
 backend/btab_darwin_amd64
 backend/btab_linux_amd64
 backend/stores
+backend/test

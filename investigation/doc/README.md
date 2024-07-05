@@ -212,7 +212,7 @@ It can be seen that scientific analysis tools such as matplotlib and numpy can b
 
 3. Machine learning analysis (example only)
 
-Naturally, machine learning modules can also be used. Call PRS data for training or call trained models for detection. Taking [SX_webshell file machine learning detection_beta] as an example, we load the trained model for detection.
+Naturally, machine learning modules can also be used. Call data for training or call trained models for detection. Taking [SX_webshell file machine learning detection_beta] as an example, we load the trained model for detection.
 
 The following is the machine learning module:
 
