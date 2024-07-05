@@ -3,6 +3,12 @@
 <a>English</a> - 
 <a href="./README_zh-cn.md">简体中文</a>
 
+### references
+
+[Basic use cases for investigation and analysis](../btab_example.ipynb)
+
+[S2_Log4j detection_beta.ipynb](../S2_Log4j检测_beta.ipynb)
+
 ### Description
 
 The investigation and analysis function is mainly to connect various data source interfaces, various processing engines, and processing processes, and use the pipeline data processing process to finally obtain the target data.

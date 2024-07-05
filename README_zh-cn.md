@@ -27,6 +27,7 @@ Blue team analyisis box is a tool for blue team security analyisis.
   - [Q\&A](#qa)
   - [交流](#交流)
   - [更新日志](#更新日志)
+    - [v0.6.x](#v06x)
     - [v0.5.x](#v05x)
     - [v0.3.x](#v03x)
   - [趋势](#趋势)
@@ -214,6 +215,12 @@ type Plugin interface {
 <img src="https://user-images.githubusercontent.com/26109420/233271729-b0d8644f-2538-40ae-8bde-abeb1187c5bb.jpg" alt=" Edge" width="180px" height="230px" /><img src="https://user-images.githubusercontent.com/26109420/233271942-aeccc557-da89-4e6e-9e4b-60cc885e141e.jpg" alt=" Edge" width="180px" height="230px" />
 
 ## 更新日志
+
+### v0.6.x
+
+1、实现多种流程化场景，如有 http 请求响应，如何研判？如有pcap，是否是恶意的？
+2、针对各种特定攻击场景的解密，
+3、结合 AI 实现分析，用户复制payload到btab上，然后拆解并组成问题，然后你黏贴到 GPT 上进行分析
 
 ### v0.5.x
 

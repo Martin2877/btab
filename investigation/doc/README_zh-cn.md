@@ -3,6 +3,13 @@
 <a href="./README.md">English</a> -
 <a>简体中文</a>
 
+### 相关内容
+
+[调查分析基本用例](../btab_example.ipynb)
+
+[S2_Log4j检测_beta.ipynb](../S2_Log4j检测_beta.ipynb)
+
+
 ### 描述
 
 调查分析功能，主要为对接各数据源接口、和各类处理引擎、处理过程，并使用管道的数据处理流程，最终获得目标数据的过程。
