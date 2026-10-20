@@ -6,6 +6,7 @@ import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/utils/Storage';
 import { PageEnum } from '@/enums/pageEnum';
 import { ErrorPageRoute } from '@/router/base';
+import { tt } from '@/locales';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
@@ -80,7 +81,9 @@ export function createRouterGuards(router: Router) {
   });
 
   router.afterEach((to, _, failure) => {
-    document.title = (to?.meta?.title as string) || document.title;
+    document.title = to?.name
+      ? tt(`menu.${String(to.name)}`, (to?.meta?.title as string) || document.title)
+      : document.title;
     if (isNavigationFailure(failure)) {
       //console.log('failed navigation', failure)
     }

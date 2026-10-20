@@ -30,17 +30,6 @@
       @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
     >
-      <template #tableTitle>
-        <n-button type="primary" @click="openDir">
-          <template #icon>
-            <n-icon>
-              <PlusOutlined />
-            </n-icon>
-          </template>
-          文件目录
-        </n-button>
-      </template>
-
       <template #toolbar>
         <n-button type="primary" @click="reloadTable">刷新数据</n-button>
       </template>
@@ -58,17 +47,14 @@
     </n-modal>
   </n-card>
 
-  <n-modal v-model:show="showModal2" :show-icon="false" preset="dialog" title="详情">
-    <n-input
-      placeholder="文件内容"
-      type="textarea"
-      size="small"
-      :autosize="{
-        minRows: 10,
-        maxRows: 20
-      }"
-      v-model:value="detailsParams.content"
-    />
+  <n-modal
+    v-model:show="showModal2"
+    :show-icon="false"
+    preset="card"
+    :style="{ width: '960px' }"
+    :title="detailsParams.name || '详情'"
+  >
+    <CodeView :content="detailsParams.content" :filename="detailsParams.name" />
   </n-modal>
 </div>
 </template>
@@ -80,14 +66,13 @@ import { BasicTable, TableAction } from "@/components/Table";
 // import { BasicForm } from "@/components/Form/index";
 import {
   getPayloadTableList,
-  getPayloadDirReq,
   uploadPayloadDataReq,
   delPayloadTableList,
   getPayloadDetailTableList,
 } from "@/api/table/list";
 import { columns } from "./columns";
-import { PlusOutlined } from "@vicons/antd";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
+import CodeView from "@/components/CodeView/index.vue";
 
 const formRef: any = ref(null);
 const message = useMessage();
@@ -109,9 +94,8 @@ const formParams = reactive({ ...initialState });
 const showModal2 = ref(false);
 
 const initialStateDetail = {
-  header : "",
-  content:"",
-  end : "",
+  name: "",
+  content: "",
 };
 
 const detailsParams = reactive({...initialStateDetail});
@@ -159,16 +143,6 @@ const actionColumn = reactive({
   },
 });
 
-
-function openDir() {
-  openDirRequset().then(function (resp) {
-    message.info("存储目录: " + resp);
-  });
-}
-
-const openDirRequset = async () => {
-  return await getPayloadDirReq();
-};
 
 const loadDataTable = async (res) => {
   return await getPayloadTableList({ ...formParams, ...params.value, ...res });
@@ -252,13 +226,12 @@ const clearList = () => {
 
 function handleDetail(record: Recordable) {
   setTimeout(() => {
-    loadDataDetailTable({search:record.sha_1}).then(
-      function(resp){
-        detailsParams.content =  resp;
-      }
-    );
+    loadDataDetailTable({ search: record.sha_1 }).then(function (resp) {
+      detailsParams.name = record.name;
+      detailsParams.content = resp;
+    });
     showModal2.value = true;
-  });  
+  });
 }
 </script>
 

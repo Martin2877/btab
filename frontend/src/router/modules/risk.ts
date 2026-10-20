@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { Layout } from '@/router/constant';
 import { SecurityScanOutlined } from '@vicons/antd';
-import { renderIcon,renderOnline } from '@/utils/index';
+import { renderIcon } from '@/utils/index';
 
 /**
  * @param name 路由名称, 必须设置,且不能重名
@@ -53,38 +53,12 @@ const routes: Array<RouteRecordRaw> = [
       //   component: () => import('@/views/risk/paonline/info.vue'),
       // },
       {
-        path: 'sqli',
-        name: 'sqli',
+        path: 'payload',
+        name: 'payload',
         meta: {
-          title: 'SQLi检测',
+          title: '攻击载荷检测',
         },
-        component: () => import('@/views/risk/sqli/index.vue'),
-      },
-      {
-        path: 'xss',
-        name: 'xss',
-        meta: {
-          title: 'XSS检测',
-        },
-        component: () => import('@/views/risk/xss/index.vue'),
-      },
-      {
-        path: 'webshell',
-        name: 'webshell',
-        meta: {
-          title: 'Webshell检测',
-          // extra: renderOnline(),
-        },
-        component: () => import('@/views/risk/webshell/index.vue'),
-      },
-      {
-        path: 'bash',
-        name: 'bash',
-        meta: {
-          title: 'bash命令检测',
-          extra: renderOnline(),
-        },
-        component: () => import('@/views/risk/bash/index.vue'),
+        component: () => import('@/views/risk/payload/index.vue'),
       },
     ],
   },

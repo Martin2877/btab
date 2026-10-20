@@ -2,25 +2,34 @@ package file
 
 import (
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // ReadingLines Reading file and return content as []string
 func ReadingLines(filename string) []string {
-	var result []string
-	file, err := os.Open(filename)
-	defer file.Close()
+	data, err := os.ReadFile(filename)
 	if err != nil {
-		return result
+		return nil
 	}
+	return SplitLines(data)
+}
 
-	scanner := bufio.NewScanner(file)
+// SplitLines 按行拆分字节内容，跳过空行（与 ReadingLines 行为一致）
+func SplitLines(data []byte) []string {
+	var result []string
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	// 单行最长支持 10MB，避免大 payload 被默认 64KB 截断
+	scanner.Buffer(make([]byte, 64*1024), 10*1024*1024)
 	for scanner.Scan() {
 		val := scanner.Text()
 		if val == "" {
@@ -28,11 +37,30 @@ func ReadingLines(filename string) []string {
 		}
 		result = append(result, val)
 	}
-
-	if err := scanner.Err(); err != nil {
-		return result
-	}
 	return result
+}
+
+// GzipBytes gzip 压缩字节内容，用于将文件内容存入数据库 BLOB
+func GzipBytes(data []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	w := gzip.NewWriter(&buf)
+	if _, err := w.Write(data); err != nil {
+		return nil, err
+	}
+	if err := w.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// GunzipBytes 解压 gzip 字节内容
+func GunzipBytes(data []byte) ([]byte, error) {
+	r, err := gzip.NewReader(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+	return io.ReadAll(r)
 }
 
 func UploadTargetsPath(extstring string) string {
@@ -121,32 +149,26 @@ func WriteFile(content string, filePath string, append bool) error {
 	return nil
 }
 
-func WriteFileBinary(content []byte, filePath string, append bool) {
+func WriteFileBinary(content []byte, filePath string, append bool) error {
 	var file *os.File
 	var err error
+	if err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+		return err
+	}
 	if append {
-		file, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o777)
+		file, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	} else {
-		file, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o777)
+		file, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o666)
 	}
 	if err != nil {
-		fmt.Println("文件打开失败", err)
-		return
+		return err
 	}
-	//及时关闭file句柄
-	file.Sync()
-	defer func(file *os.File) {
-		err2 := file.Close()
-		if err2 != nil {
-			log.Fatal(err2.Error())
-		}
-	}(file)
-	//defer file.Close()
-	//写入文件时，使用带缓存的 *Writer
+	defer file.Close()
 	write := bufio.NewWriter(file)
-	write.Write(content)
-	//Flush将缓存的文件真正写入到文件中
-	write.Flush()
+	if _, err = write.Write(content); err != nil {
+		return err
+	}
+	return write.Flush()
 }
 
 func ReadFile(filePath string) (string, error) {
@@ -171,10 +193,35 @@ func ReadFile(filePath string) (string, error) {
 	return string(fd), nil
 }
 
+func IsFile(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false // Path likely doesn't exist
+	}
+	return !info.IsDir()
+}
+
 func GetFiles(path string) (fs []string) {
+	if IsFile(path) {
+		return []string{path}
+	}
 	files, _ := ioutil.ReadDir(path)
 	for _, f := range files {
 		fs = append(fs, filepath.Join(path, f.Name()))
 	}
 	return
+}
+
+// SafeFileName 校验文件名，防止路径穿越（如 ../../xxx）。
+// 返回纯文件名；非法文件名返回空串。
+func SafeFileName(name string) string {
+	if name == "" {
+		return ""
+	}
+	base := filepath.Base(name)
+	if base != name || base == "." || base == ".." ||
+		strings.ContainsAny(name, `/\`) || strings.Contains(name, "..") {
+		return ""
+	}
+	return base
 }

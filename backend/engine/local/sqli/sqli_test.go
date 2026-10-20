@@ -11,7 +11,7 @@ func TestSqli_SubmitOnce(t *testing.T) {
 		Code   int
 		result string
 	}{
-		{") or true--\",\"' or 'x'='x\",\"'", 2000, ""},
+		{") or true--\",\"' or 'x'='x\",\"'", 20000, ""},
 	}
 
 	sqli := Sqli{}

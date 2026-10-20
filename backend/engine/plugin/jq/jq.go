@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/itchyny/gojq"
 	"github.com/tidwall/gjson"
@@ -40,22 +41,26 @@ func (plugin *JQ) Check() error {
 func (plugin *JQ) Exec() error {
 	plugin.State = db.StateRunning
 
+	fail := func(err error) error {
+		plugin.State = db.StateFinish
+		plugin.FinalStatus = db.FinalStatusFailed
+		return err
+	}
+
 	// 解析 json 内容
 	if !gjson.Valid(plugin.Content) {
-		return errors.New("非法json:" + plugin.Content)
+		return fail(errors.New("非法json:" + plugin.Content))
 	}
-	input, ok := gjson.Parse(plugin.Content).Value().(interface{})
-	if !ok {
-		return errors.New("gjson 加载数据失败")
-	}
+	input := gjson.Parse(plugin.Content).Value()
 
 	// 解析过滤语句
 	query, err := gojq.Parse(plugin.Filter)
+	if err != nil {
+		return fail(fmt.Errorf("jq 语法错误: %v", err))
+	}
 	code, err := gojq.Compile(query)
 	if err != nil {
-		plugin.State = db.StateFinish
-		plugin.FinalStatus = db.FinalStatusFailed
-		return errors.New(fmt.Sprintln("jq处理错误:", err.Error()))
+		return fail(fmt.Errorf("jq 编译错误: %v", err))
 	}
 	// 加载 json 内容
 	var result []interface{}
@@ -69,7 +74,7 @@ func (plugin *JQ) Exec() error {
 			if err, ok := err.(*gojq.HaltError); ok && err.Value() == nil {
 				break
 			}
-			return errors.New(fmt.Sprintln("加载json内容错误:", err.Error()))
+			return fail(fmt.Errorf("jq 执行错误: %v", err))
 		}
 		result = append(result, v)
 	}

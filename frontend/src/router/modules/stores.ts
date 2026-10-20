@@ -43,12 +43,29 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/stores/payloadList/index.vue'),
       },
       {
+        path: 'nuclei-list',
+        name: 'nuclei-list',
+        redirect: '/engine/vuln',
+        meta: {
+          title: 'nuclei模板',
+          hidden: true,
+        },
+      },
+      {
         path: 'webshell-list',
         name: 'webshell-list',
         meta: {
           title: 'webshell列表',
         },
         component: () => import('@/views/stores/webshellList/index.vue'),
+      },
+      {
+        path: 'weblog-list',
+        name: 'weblog-list',
+        meta: {
+          title: 'web日志列表',
+        },
+        component: () => import('@/views/stores/weblogList/index.vue'),
       },
     ],
   },

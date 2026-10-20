@@ -21,6 +21,7 @@
   </n-space>
   <n-space>
       <n-button type="primary" :loading="formBtnLoading" @click="textSubmit">提交</n-button>
+      <n-button @click="fillSample">示例</n-button>
       <n-button @click="resetForm">重置</n-button>
     </n-space>
 
@@ -53,10 +54,12 @@ const formRef: any = ref(null);
 const message = useMessage();
 const formBtnLoading = ref(false);
 
+const sampleContent = "aced0005740004414243447071007e0000";
+
 const initialState = {
   plugin: 'SerializationDumper',
   payloads: {
-    content : "aced0005740004414243447071007e0000",
+    content : sampleContent,
   },
 };
 
@@ -94,6 +97,11 @@ function textSubmit(e) {
       formBtnLoading.value = false;
     });
   }
+
+function fillSample(){
+  textValue.payloads.content = sampleContent;
+  textSubmit(new Event('submit'));
+}
 
 function resetForm(){
   textValue.payloads.content = "";

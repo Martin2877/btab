@@ -21,6 +21,7 @@
   import { generatorMenu, generatorMenuMix } from '@/utils';
   import { useProjectSettingStore } from '@/store/modules/projectSetting';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
+  import { useI18n } from 'vue-i18n';
 
   export default defineComponent({
     name: 'Menu',
@@ -55,6 +56,10 @@
       const { getNavMode } = useProjectSetting();
 
       const navMode = getNavMode;
+
+      // 语言切换后重建菜单文案
+      const { locale } = useI18n();
+      watch(locale, () => updateMenu());
 
       // 获取当前打开的子菜单
       const matched = currentRoute.matched;

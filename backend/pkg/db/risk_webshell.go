@@ -45,28 +45,28 @@ func DeleteRiskWebshell(id int) bool {
 }
 
 func GetRiskWebshells(page int, pageSize int, field *RiskWebshellSearchField) (riskwebshells []RiskWebshell) {
-	db := GlobalDB.Preload("ForeignWebshell")
+	db := GlobalDB.Preload("ForeignWebshell", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("Content")
+	})
 
-	// 搜索名字、Sha1 或 uid
+	// 按关联的 webshell 文件名搜索（需 Joins，关联表别名为 ForeignWebshell）
 	if field.Search != "" {
-		db = db.Where(
-			GlobalDB.Where("ForeignWebshell.name like ?", "%"+field.Search+"%"))
+		db = db.Joins("ForeignWebshell").Where("ForeignWebshell.name like ?", "%"+field.Search+"%")
 	}
 	//	分页
 	if page > 0 && pageSize > 0 {
-		db = db.Offset((page - 1) * pageSize).Order("id desc").Limit(pageSize).Find(&riskwebshells)
+		db = db.Offset((page - 1) * pageSize).Order("id desc").Limit(pageSize)
 	}
+	db.Find(&riskwebshells)
 	return
 }
 
 func GetRiskWebshellTotal(field *RiskWebshellSearchField) (total int64) {
 	db := GlobalDB.Model(&RiskWebshell{})
 
-	// 搜索名字、Sha1 或 uid
+	// 按关联的 webshell 文件名搜索
 	if field.Search != "" {
-		db = db.Where(
-			GlobalDB.Where("name like ?", "%"+field.Search+"%").
-				Or("sha_1 like ?", "%"+field.Search+"%"))
+		db = db.Joins("ForeignWebshell").Where("ForeignWebshell.name like ?", "%"+field.Search+"%")
 	}
 	db.Count(&total)
 	return

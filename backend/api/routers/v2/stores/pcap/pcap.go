@@ -1,123 +1,124 @@
 package pcap
 
 import (
+	"io"
+	"mime/multipart"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/Martin2877/blue-team-box/api/msg"
+	pluginpcap "github.com/Martin2877/blue-team-box/engine/plugin/pcap"
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/Martin2877/blue-team-box/pkg/file"
-	files "github.com/Martin2877/blue-team-box/pkg/file"
 	utils "github.com/Martin2877/blue-team-box/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
-	"io"
-	"log"
-	"math"
-	"mime/multipart"
-	"os"
-	"path"
 )
 
-const STORES = "/stores/pcap"
+// MaxUploadSize pcap 单文件上传上限 200MB
+const MaxUploadSize = 200 << 20
 
-
-func Dir() string {
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	return targetDir
-}
-
-func GetDir(c *gin.Context) {
-	msg.ResultSuccess(c,Dir())
-	return
-}
-
-
-// @Summary result list
-// @Tags Result
-// @Description 列表
+// @Summary pcap upload
+// @Tags Pcap
+// @Description 上传 pcap 样本，数据库仅记录元数据（内容不入库，
+// 分析时通过 /api/analyze/pcap multipart 上传走临时文件）
 // @Produce  json
 // @Security token
-// @Param page query int true "Page"
-// @Param pagesize query int true "Pagesize"
-// @Param object query db.ResultSearchField false "field"
 // @Success 200 {object} msg.Response
 // @Failure 200 {object} msg.Response
-// @Router /api/v1/result/ [get]
+// @Router /api/stores/pcap/upload [post]
 func Upload(c *gin.Context) {
-	// 1、上传文件
-	// FormFile方法会读取参数“upload”后面的文件名，返回值是一个File指针，和一个FileHeader指针，和一个err错误。
 	_file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		//msg.ResultFailed(c,"Bad request")
-		msg.ResultSelfDefined(c,err.Error())
-		return
-	}
-	// header调用Filename方法，就可以得到文件名
-	filename := header.Filename
-	// 创建一个文件，文件名为filename，这里的返回值out也是一个File指针
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	targetFile := path.Join(targetDir,filename)
-
-	if files.Exists(targetFile){
-		msg.ResultSelfDefined(c,"文件已存在")
-		return
-	}
-
-	if db.ExistPcapByName(filename){
-		msg.ResultSelfDefined(c,"文件已存在")
-		return
-	}
-
-
-	// 创建多层级目录
-	os.MkdirAll(targetDir, os.ModePerm)
-
-	content, err4 := io.ReadAll(_file)
-	if err4 != nil {
-		msg.ResultSelfDefined(c,err4.Error())
+		msg.ResultSelfDefined(c, err.Error())
 		return
 	}
 	defer func(_file multipart.File) {
-		err5 := _file.Close()
-		if err5 != nil {
-			log.Fatalln(err5.Error())
-		}
+		_ = _file.Close()
 	}(_file)
-	file.WriteFileBinary(content,targetFile,false)
 
-
-	pcapSha1 := utils.Sha1f(targetFile)
-	//newTargetFile := path.Join(targetDir,pcapSha1 + path.Ext(targetFile))
-	//fmt.Println(newTargetFile)
-	//err2 := os.Rename(targetFile, newTargetFile)
-	//if err2 != nil {
-	//	msg.ResultSelfDefined(c,err.Error())
-	//	return
-	//}
-
-	// 2、写入数据库
-	pcap :=  db.Pcap{
-		Name:        filename,
-		Sha1:        pcapSha1,
-		Size:        int(header.Size),
+	filename := file.SafeFileName(header.Filename)
+	if filename == "" {
+		msg.ResultSelfDefined(c, "非法文件名")
+		return
+	}
+	if header.Size > MaxUploadSize {
+		msg.ResultSelfDefined(c, "文件过大")
+		return
+	}
+	if db.ExistPcapByName(filename) {
+		msg.ResultSelfDefined(c, "文件已存在")
+		return
 	}
 
+	content, err := io.ReadAll(io.LimitReader(_file, MaxUploadSize+1))
+	if err != nil {
+		msg.ResultSelfDefined(c, err.Error())
+		return
+	}
+	if len(content) == 0 || len(content) > MaxUploadSize {
+		msg.ResultSelfDefined(c, "文件为空或过大")
+		return
+	}
+
+	// 落盘到 stores/pcap，供流量包检测任务直接引用
+	if err := os.MkdirAll(pluginpcap.Dir(), 0755); err != nil {
+		msg.ResultSelfDefined(c, "创建存储目录失败: "+err.Error())
+		return
+	}
+	if err := file.WriteFileBinary(content, filepath.Join(pluginpcap.Dir(), filename), false); err != nil {
+		msg.ResultSelfDefined(c, "文件保存失败: "+err.Error())
+		return
+	}
+
+	pcap := db.Pcap{
+		Name: filename,
+		Sha1: utils.Sha1Bytes(content),
+		Size: len(content),
+	}
 	db.AddPcap(pcap)
 
-	msg.ResultSuccess(c,"true")
-	return
+	msg.ResultSuccess(c, "true")
 }
-
 
 type TableResult struct {
-	Page int `json:"page"`
-	PageCount int `json:"pageCount"`
-	PageSize int   `json:"pageSize"`
-	List []db.Pcap `json:"list"`
+	Page      int       `json:"page"`
+	PageCount int       `json:"pageCount"`
+	PageSize  int       `json:"pageSize"`
+	List      []db.Pcap `json:"list"`
 }
 
-
-
+// syncStoreDir 将 stores/pcap 目录中已落盘但未登记入库的文件补录元数据，
+// 使内置示例流量包开箱即可在列表与检测任务中选择
+func syncStoreDir() {
+	entries, err := os.ReadDir(pluginpcap.Dir())
+	if err != nil {
+		return
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		ext := strings.ToLower(filepath.Ext(name))
+		if ext != ".pcap" && ext != ".pcapng" {
+			continue
+		}
+		if db.ExistPcapByName(name) {
+			continue
+		}
+		content, err := os.ReadFile(filepath.Join(pluginpcap.Dir(), name))
+		if err != nil || len(content) == 0 {
+			continue
+		}
+		db.AddPcap(db.Pcap{
+			Name: name,
+			Sha1: utils.Sha1Bytes(content),
+			Size: len(content),
+		})
+	}
+}
 
 // @Summary pcap list
 // @Tags Pcap
@@ -131,6 +132,7 @@ type TableResult struct {
 // @Failure 200 {object} msg.Response
 // @Router /api/v1/poc/ [get]
 func Get(c *gin.Context) {
+	syncStoreDir()
 	field := db.PcapSearchField{Search: ""}
 
 	// 分页
@@ -142,12 +144,13 @@ func Get(c *gin.Context) {
 		field.Search = arg
 	}
 
+	page, pageSize = msg.NormalizePageParams(page, pageSize)
 	pcaps := db.GetPcaps(page, pageSize, &field)
-	total := int(db.GetPcapTotal(&field))
-	tableResult := TableResult{Page: page, PageSize:pageSize,List: pcaps}
-	tableResult.PageCount = int(math.Ceil(float64(total / pageSize)))
+	total := db.GetPcapTotal(&field)
+	tableResult := TableResult{Page: page, PageSize: pageSize, List: pcaps}
+	tableResult.PageCount = msg.PageCount(total, pageSize)
 
-	msg.ResultSuccess(c,tableResult)
+	msg.ResultSuccess(c, tableResult)
 	return
 }
 
@@ -162,26 +165,15 @@ func Get(c *gin.Context) {
 // @Router /api/v1/poc/{id}/ [delete]
 func Delete(c *gin.Context) {
 	id := com.StrTo(c.Query("id")).MustInt()
-	filename := c.Query("name")
-	// 创建一个文件，文件名为filename，这里的返回值out也是一个File指针
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	targetFile := path.Join(targetDir,filename)
-
-	if db.ExistPcapById(id) {
-		// 删除文件
-		err := os.Remove(targetFile)
-		if err != nil {
-			msg.ResultFailed(c,err.Error())
-			return
-		}
-		// 删除数据库
+	p := db.GetPcap(id)
+	if p.Id > 0 {
+		// 删除数据库记录与落盘文件
 		db.DeletePcap(id)
-
-		msg.ResultSuccess(c,"删除成功")
-		return
-	} else {
-		msg.ResultFailed(c,"删除失败")
+		if p.Name != "" {
+			_ = os.Remove(filepath.Join(pluginpcap.Dir(), filepath.Base(p.Name)))
+		}
+		msg.ResultSuccess(c, "删除成功")
 		return
 	}
+	msg.ResultFailed(c, "删除失败")
 }

@@ -31,17 +31,6 @@
       @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
     >
-      <template #tableTitle>
-        <n-button type="primary" @click="openDir">
-          <template #icon>
-            <n-icon>
-              <PlusOutlined />
-            </n-icon>
-          </template>
-          文件目录
-        </n-button>
-      </template>
-
       <template #toolbar>
         <n-button type="primary" @click="reloadTable">刷新数据</n-button>
       </template>
@@ -66,9 +55,8 @@ import { h, reactive, ref } from "vue";
 import { useMessage,UploadCustomRequestOptions } from "naive-ui";
 import { BasicTable, TableAction } from "@/components/Table";
 // import { BasicForm } from "@/components/Form/index";
-import { getPcapTableList, openDirReq, uploadDataReq, delPcapTableList } from "@/api/table/list";
+import { getPcapTableList, uploadDataReq, delPcapTableList } from "@/api/table/list";
 import { columns } from "./columns";
-import { PlusOutlined } from "@vicons/antd";
 import { ArchiveOutline as ArchiveIcon } from "@vicons/ionicons5";
 
 
@@ -130,16 +118,6 @@ const actionColumn = reactive({
 // function addTable() {
 //   showModal.value = true;
 // }
-
-function openDir() {
-  openDirRequset().then(function (resp) {
-    message.info("存储目录: " + resp);
-  });
-}
-
-const openDirRequset = async () => {
-  return await openDirReq();
-};
 
 const loadDataTable = async (res) => {
   return await getPcapTableList({ ...formParams, ...params.value, ...res });

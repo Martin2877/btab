@@ -2,32 +2,34 @@ package xss
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
+
 	"github.com/Martin2877/blue-team-box/api/msg"
 	"github.com/corazawaf/libinjection-go"
 )
 
-
 type Result struct {
-	Found bool `json:"found"`
-	Result string `json:"result"`
-	Catch []string `json:"catch"`
+	Found   bool     `json:"found"`
+	Result  string   `json:"result"`
+	Catch   []string `json:"catch"`
 	NoCatch []string `json:"no_catch"`
 }
 
 type XSS struct {
 }
 
-func (xss *XSS)SubmitLines(contents []string)(*msg.JsonResponse,error){
+func (xss *XSS) SubmitLines(contents []string) (*msg.JsonResponse, error) {
 	res := Result{}
-	for _,content := range contents{
+	for _, content := range contents {
 		result := libinjection.IsXSS(content)
-		if result{
+		if result {
 			res.Catch = append(res.Catch, content)
-		}else{
+		} else {
 			res.NoCatch = append(res.NoCatch, content)
 		}
 	}
-	if len(res.Catch) > 0{
+	if len(res.Catch) > 0 {
 		res.Found = true
 		res.Result = fmt.Sprintf("存在XSS，总数 %d 条, 检出 %d 条，未检出 %d 条", len(res.Catch)+len(res.NoCatch), len(res.Catch), len(res.NoCatch))
 		jres := msg.JsonResponse{
@@ -36,8 +38,8 @@ func (xss *XSS)SubmitLines(contents []string)(*msg.JsonResponse,error){
 			Result:  res,
 			Type:    "success",
 		}
-		return &jres,nil
-	}else{
+		return &jres, nil
+	} else {
 		res.Found = false
 		res.Result = "未发现XSS"
 		jres := msg.JsonResponse{
@@ -46,30 +48,65 @@ func (xss *XSS)SubmitLines(contents []string)(*msg.JsonResponse,error){
 			Result:  res,
 			Type:    "success",
 		}
-		return &jres,nil
+		return &jres, nil
 	}
 }
 
+// candidates 收集待检测的字符串：原始内容、URL参数值、POST表单值、URL解码值
+func candidates(content string) []string {
+	set := map[string]struct{}{content: {}}
 
-func (xss *XSS) SubmitOnce(content string) (*msg.JsonResponse,error){
-	result := libinjection.IsXSS(content)
+	if u, err := url.Parse(content); err == nil && u != nil {
+		for _, values := range u.Query() {
+			for _, v := range values {
+				set[v] = struct{}{}
+			}
+		}
+	}
+	// POST 表单形式 k=v&k=v
+	if strings.Contains(content, "=") && !strings.Contains(content, "\n") {
+		if m, err := url.ParseQuery(content); err == nil {
+			for _, values := range m {
+				for _, v := range values {
+					set[v] = struct{}{}
+				}
+			}
+		}
+	}
+	// URL 编码过的内容解码后再检测
+	if decoded, err := url.QueryUnescape(content); err == nil && decoded != content {
+		set[decoded] = struct{}{}
+	}
 
-	if result{
-		// 返回结果
+	out := make([]string, 0, len(set))
+	for s := range set {
+		out = append(out, s)
+	}
+	return out
+}
+
+func (xss *XSS) SubmitOnce(content string) (*msg.JsonResponse, error) {
+	var hits []string
+	for _, c := range candidates(content) {
+		if libinjection.IsXSS(c) {
+			hits = append(hits, c)
+		}
+	}
+
+	if len(hits) > 0 {
 		jres := msg.JsonResponse{
 			Code:    20000,
 			Message: "发现XSS",
-			Result:  fmt.Sprintln("检测到 XSS"),
+			Result:  fmt.Sprintf("检测到 XSS，命中内容：【%s】", strings.Join(hits, " , ")),
 			Type:    "success",
 		}
-		return &jres,nil
-	}else{
-		jres := msg.JsonResponse{
-			Code:    40400,
-			Message: "未检测到XSS",
-			Result:  fmt.Sprintln("未发现 XSS"),
-			Type:    "success",
-		}
-		return &jres,nil
+		return &jres, nil
 	}
+	jres := msg.JsonResponse{
+		Code:    40400,
+		Message: "未检测到XSS",
+		Result:  "未发现 XSS",
+		Type:    "success",
+	}
+	return &jres, nil
 }

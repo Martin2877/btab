@@ -39,7 +39,7 @@
                 @click.stop="goPage(element)"
                 @contextmenu="handleContextMenu($event, element)"
               >
-                <span>{{ element.meta.title }}</span>
+                <span>{{ tt(`menu.${element.name}`, element.meta.title) }}</span>
                 <n-icon size="14" @click.stop="closeTabItem(element)" v-if="!element.meta.affix">
                   <CloseOutlined />
                 </n-icon>
@@ -113,6 +113,7 @@
   import { useProjectSettingStore } from '@/store/modules/projectSetting';
   import { useThemeVars } from 'naive-ui';
   import { useGo } from '@/hooks/web/usePage';
+  import { tt } from '@/locales';
 
   export default defineComponent({
     name: 'TabsView',
@@ -521,6 +522,7 @@
         getAppTheme,
         getCardColor,
         getBaseColor,
+        tt,
       };
     },
   });

@@ -61,6 +61,11 @@ func AddPcapAnalyse(pa PcapAnalyse) bool {
 	return true
 }
 
+func CreatePcapAnalyse(pa *PcapAnalyse) bool {
+	GlobalDB.Create(pa)
+	return true
+}
+
 func DeletePcapAnalyse(id int) bool {
 	GlobalDB.Model(&PcapAnalyse{}).Where("id = ?", id).Delete(&PcapAnalyse{})
 	return true
@@ -75,26 +80,24 @@ func GetPcapAnalyses(page int, pageSize int, field *PcapAnalyseSearchField) (pas
 		return db.Unscoped()
 	})
 
-	// 搜索名字、Sha1 或 uid
+	// 按任务名搜索
 	if field.Search != "" {
-		db = db.Where(
-			GlobalDB.Where("name like ?", "%"+field.Search+"%"))
+		db = db.Where("name like ?", "%"+field.Search+"%")
 	}
 	//	分页
 	if page > 0 && pageSize > 0 {
-		db = db.Offset((page - 1) * pageSize).Order("id desc").Limit(pageSize).Find(&pas)
+		db = db.Offset((page - 1) * pageSize).Order("id desc").Limit(pageSize)
 	}
+	db.Find(&pas)
 	return
 }
 
 func GetPcapAnalyseTotal(field *PcapAnalyseSearchField) (total int64) {
 	db := GlobalDB.Model(&PcapAnalyse{})
 
-	// 搜索名字、Sha1 或 uid
+	// 按任务名搜索
 	if field.Search != "" {
-		db = db.Where(
-			GlobalDB.Where("name like ?", "%"+field.Search+"%").
-				Or("sha_1 like ?", "%"+field.Search+"%"))
+		db = db.Where("name like ?", "%"+field.Search+"%")
 	}
 	db.Count(&total)
 	return

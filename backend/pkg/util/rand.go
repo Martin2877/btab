@@ -11,7 +11,6 @@ import (
 	"unsafe"
 )
 
-
 const letterBytes = "abcdefghijklmnopqrstuvwxyz"
 const letterNumberBytes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const lowletterNumberBytes = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -56,8 +55,6 @@ func RandLowLetterNumber(n int) string {
 	return RandFromChoices(n, lowletterNumberBytes)
 }
 
-
-
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var src = rand.NewSource(time.Now().UnixNano())
@@ -87,8 +84,12 @@ func RandStr(n int) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-
-
+// Sha1Bytes 计算字节内容的 sha1
+func Sha1Bytes(data []byte) string {
+	h := sha1.New()
+	h.Write(data)
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 func Sha1f(fName string) string {
 	f, e := os.Open(fName)

@@ -9,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/tools',
     name: 'Tools',
-    redirect: '/tools/cyberchef',
+    redirect: '/tools/jq',
     component: Layout,
     meta: {
       title: '辅助工具',
@@ -46,6 +46,50 @@ const routes: Array<RouteRecordRaw> = [
           sort: 1,
         },
         component: () => import('@/views/tools/SerializationDumper/index.vue'),
+      },
+      {
+        path: 'behinder',
+        name: 'behinder',
+        meta: {
+          title: '冰蝎流量解密',
+          activeMenu: 'behinder',
+          sort: 2,
+          tab: 'behinder',
+        },
+        component: () => import('@/views/tools/btt/index.vue'),
+      },
+      {
+        path: 'godzilla',
+        name: 'godzilla',
+        meta: {
+          title: '哥斯拉流量解密',
+          activeMenu: 'godzilla',
+          sort: 3,
+          tab: 'godzilla',
+        },
+        component: () => import('@/views/tools/btt/index.vue'),
+      },
+      {
+        path: 'shiro',
+        name: 'shiro',
+        meta: {
+          title: 'Shiro密钥检测',
+          activeMenu: 'shiro',
+          sort: 4,
+          tab: 'shiro',
+        },
+        component: () => import('@/views/tools/btt/index.vue'),
+      },
+      {
+        path: 'log4j2',
+        name: 'log4j2',
+        meta: {
+          title: 'Log4j2',
+          activeMenu: 'log4j2',
+          sort: 5,
+          tab: 'log4j2',
+        },
+        component: () => import('@/views/tools/btt/index.vue'),
       },
       // {
       //   path: '/BlueTeamTools',

@@ -3,11 +3,14 @@ package proto
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/Martin2877/blue-team-box/engine"
 
-	"github.com/Martin2877/blue-team-box/pkg/conf"
 	"log"
 	"net"
+
+	"github.com/Martin2877/blue-team-box/pkg/conf"
 
 	pb "github.com/Martin2877/blue-team-box/pkg/proto/pb"
 	"google.golang.org/grpc"
@@ -30,8 +33,10 @@ func (ins *gRPCBTABServer) Ping(ctx context.Context, in *pb.PingRequest) (*pb.Pi
 	return &pb.PingReply{Message: &jResp}, nil
 }
 
-// Engines
-var engines = engine.NewEngines()
+// Engines 每个请求创建独立实例，避免并发请求共享 GlobalPayloads/Steps 造成数据竞争
+func newEngines() *engine.Engines {
+	return engine.NewEngines()
+}
 
 type gRPCEnginesServer struct {
 	pb.UnimplementedEnginesServer
@@ -49,17 +54,19 @@ func (ins *gRPCEnginesServer) CheckAlive(ctx context.Context, in *pb.CheckAliveR
 }
 
 func (ins *gRPCEnginesServer) Set(ctx context.Context, in *pb.SetRequest) (*pb.SetReply, error) {
+	engines := newEngines()
 	engines.SetGlobalFieldValues(in.Name, in.Content)
 	jResp := pb.ResponseType{
 		Code:    20000,
 		Message: "",
-		Result:  string(rune(len(engines.GlobalPayloads))),
+		Result:  strconv.Itoa(len(engines.GlobalPayloads)),
 		Type:    "success",
 	}
 	return &pb.SetReply{Message: &jResp}, nil
 }
 
 func (ins *gRPCEnginesServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetReply, error) {
+	engines := newEngines()
 	value, ok := engines.GlobalPayloads[in.Name]
 	if ok {
 		jResp := pb.ResponseType{
@@ -82,6 +89,7 @@ func (ins *gRPCEnginesServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.G
 
 func (ins *gRPCEnginesServer) Run(ctx context.Context, in *pb.RunRequest) (*pb.RunReply, error) {
 	var err error
+	engines := newEngines()
 	// 清除原有的 steps
 	engines.ClearSteps()
 
@@ -130,6 +138,7 @@ func (ins *gRPCSearchServer) CheckConnection(ctx context.Context, in *pb.CheckCo
 
 func (ins *gRPCSearchServer) Submit(ctx context.Context, in *pb.SubmitRequest) (*pb.SubmitReply, error) {
 	var err error
+	engines := newEngines()
 	engines.ClearSteps()
 	err = engines.LoadQueries(in.Content)
 	if err != nil {
@@ -182,12 +191,14 @@ func (ins *gRPCSearchServer) SubmitByName(ctx context.Context, in *pb.SubmitByNa
 	return &pb.SubmitByNameReply{Message: &jResp}, nil
 }
 
-func RunGRPCServer() {
+func RunGRPCServer(port string) {
 	var address string
-	if conf.GlobalConfig.GRPCConfig.Address == "" {
-		address = ":50051"
-	} else {
+	if port != "" {
+		address = fmt.Sprintf(":%s", port)
+	} else if conf.GlobalConfig.GRPCConfig.Address != "" {
 		address = conf.GlobalConfig.GRPCConfig.Address
+	} else {
+		log.Fatalf("grpc address not found")
 	}
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
@@ -198,7 +209,7 @@ func RunGRPCServer() {
 	pb.RegisterEnginesServer(s, &gRPCEnginesServer{})
 	pb.RegisterSearchServer(s, &gRPCSearchServer{})
 
-	fmt.Printf("Starting gRPC listen on: %s\n", conf.GlobalConfig.GRPCConfig.Address)
+	fmt.Printf("Starting gRPC listen on: %s\n", address)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

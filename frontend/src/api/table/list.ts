@@ -87,16 +87,6 @@ export function delTableAPIList(params) {
 // ====================================
 
 
-// 获取 文件夹
-export function openDirReq() {
-  return http.request({
-    url: '/stores/pcap/dir',
-    method: 'get',
-  });
-}
-
-
-
 // 上传
 export function uploadDataReq(params) {
   const headers = { 'Content-Type': 'multipart/form-data' };
@@ -131,16 +121,6 @@ export function delPcapTableList(params) {
 // ====================================
 //   Payload
 // ====================================
-
-
-// 获取 文件夹
-export function getPayloadDirReq() {
-  return http.request({
-    url: '/stores/payload/dir',
-    method: 'get',
-  });
-}
-
 
 
 // 上传
@@ -190,16 +170,6 @@ export function getPayloadDetailTableList(params) {
 // ====================================
 
 
-// 获取 文件夹
-export function getWebshellDirReq() {
-  return http.request({
-    url: '/stores/webshell/dir',
-    method: 'get',
-  });
-}
-
-
-
 // 上传
 export function uploadWebshellDataReq(params) {
   const headers = { 'Content-Type': 'multipart/form-data' };
@@ -235,6 +205,99 @@ export function delWebshellTableList(params) {
 export function getWebshellDetailTableList(params) {
   return http.request({
     url: '/stores/webshell/detail',
+    method: 'get',
+    params,
+  });
+}
+
+
+// ====================================
+//   Weblog（web 访问日志）
+// ====================================
+
+// 上传
+export function uploadWeblogDataReq(params) {
+  const headers = { 'Content-Type': 'multipart/form-data' };
+  return http.request({
+    url: '/stores/weblog/upload',
+    method: 'post',
+    params,
+    headers
+  });
+}
+
+//获取 table
+export function getWeblogTableList(params) {
+  return http.request({
+    url: '/stores/weblog/list',
+    method: 'get',
+    params,
+  });
+}
+
+// 删除项
+export function delWeblogTableList(params) {
+  return http.request({
+    url: '/stores/weblog/del',
+    method: 'get',
+    params,
+  });
+}
+
+//获取日志内容（按 id）
+export function getWeblogDetailTableList(params) {
+  return http.request({
+    url: '/stores/weblog/detail',
+    method: 'get',
+    params,
+  });
+}
+
+
+// ====================================
+//   Nuclei 模板
+// 上传
+export function uploadNucleiDataReq(params) {
+  const headers = { 'Content-Type': 'multipart/form-data' };
+  return http.request({
+    url: '/stores/nuclei/upload',
+    method: 'post',
+    params,
+    headers
+  });
+}
+
+//获取 table
+export function getNucleiTableList(params) {
+  return http.request({
+    url: '/stores/nuclei/list',
+    method: 'get',
+    params,
+  });
+}
+
+// 删除项
+export function delNucleiTableList(params) {
+  return http.request({
+    url: '/stores/nuclei/del',
+    method: 'get',
+    params,
+  });
+}
+
+//获取详情
+export function getNucleiDetailTableList(params) {
+  return http.request({
+    url: '/stores/nuclei/detail',
+    method: 'get',
+    params,
+  });
+}
+
+// 启用/停用
+export function setNucleiEnable(params) {
+  return http.request({
+    url: '/stores/nuclei/enable',
     method: 'get',
     params,
   });
@@ -295,6 +358,17 @@ export function getPATableList(params) {
       isTransformResponse: false,
     }
   );
+}
+
+/**
+ * @description: 查询检测进度与实时结果
+ */
+export function getPAProgress(params) {
+  return http.request({
+    url: '/risk/pa/progress',
+    method: 'get',
+    params,
+  });
 }
 
 
@@ -429,6 +503,22 @@ export function getTableRiskSqliList(params) {
   );
 }
 
+/**
+ * @description: 统一载荷识别：自动分类 + 各引擎检测
+ */
+export function riskDetectOnce(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/risk/detect',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
 // ====================================
 //   HTTP 深度解析
 // ====================================
@@ -441,6 +531,20 @@ export function getRiskHttpParseTips(params){
     params,
   },
   {
+    isTransformResponse: false,
+  });
+}
+
+// 合成流量包：将请求/响应合成含 TCP 会话的 pcap 下载
+export function genHttpPcap(params){
+  return http.request({
+    url:'/risk/http_parse/genpcap',
+    method:'POST',
+    params,
+    responseType:'blob',
+  },
+  {
+    isReturnNativeResponse: true,
     isTransformResponse: false,
   });
 }
@@ -576,7 +680,7 @@ export function getTableRiskBASHList(params) {
 
 
 // ====================================
-//   Risk BASH
+//   Tools Plugin
 // ====================================
 
 /**
@@ -595,6 +699,105 @@ export function getTableRiskBASHList(params) {
   );
 }
 
+
+// ====================================
+//  BlueTeamTools (纯Go实现)
+// ====================================
+
+/**
+ * @description: 冰蝎流量解密
+ */
+export function bttBehinderDecrypt(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/behinder',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: 哥斯拉流量解密
+ */
+export function bttGodzillaDecrypt(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/godzilla',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: Shiro rememberMe 密钥检测
+ */
+export function bttShiroCheck(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/shiro',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: Log4j2 lookup 解析
+ */
+export function bttLog4j2Parse(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/log4j2/parse',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: Log4j2 payload 生成
+ */
+export function bttLog4j2Generate(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/log4j2/gen',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: 获取各蓝队工具示例数据
+ */
+export function bttSamples() {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/tools/btt/samples',
+      method: 'GET',
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
 
 // ====================================
 //  Investigation Search

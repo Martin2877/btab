@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"errors"
 	"github.com/Martin2877/blue-team-box/engine/plugin/SerializationDumper"
 	"github.com/Martin2877/blue-team-box/engine/plugin/jq"
 	"github.com/Martin2877/blue-team-box/engine/plugin/pcap"
@@ -17,25 +16,10 @@ type Plugin interface {
 	GetResult() string
 }
 
-var PluginMap = make(map[string]Plugin)
-
-func init() {
-	// 初始化内容
-	// .. 在这里补充
-	PluginMap["jq"] = &jq.JQ{}
-	PluginMap["SerializationDumper"] = &SerializationDumper.SerializationDumper{}
-	PluginMap["pcap"] = &pcap.Pcap{}
-}
-
-type Plugins struct {
-	Plugin Plugin `json:"plugin"`
-}
-
-func (plugins *Plugins) Init(plugin string) error {
-	value, ok := PluginMap[plugin]
-	if ok {
-		plugins.Plugin = value
-		return nil
-	}
-	return errors.New("找不到相应插件")
+// MapPluginGlb 插件工厂表：每次调用返回全新实例，避免并发请求共享状态
+var MapPluginGlb = map[string]func() Plugin{
+	"jq":                  func() Plugin { return &jq.JQ{} },
+	"SerializationDumper": func() Plugin { return &SerializationDumper.SerializationDumper{} },
+	"pcap":                func() Plugin { return &pcap.Pcap{} },
+	//"pcapcheck":         func() Plugin { return &pcapcheck.PcapCheck{} },
 }

@@ -15,35 +15,27 @@ import { renderIcon } from '@/utils/index';
  *
  * */
 const routes: Array<RouteRecordRaw> = [
-  // {
-  //   path: '/setting',
-  //   name: 'Setting',
-  //   redirect: '/setting/account',
-  //   component: Layout,
-  //   meta: {
-  //     title: '设置页面',
-  //     icon: renderIcon(SettingOutlined),
-  //     sort: 5,
-  //   },
-  //   children: [
-  //     {
-  //       path: 'account',
-  //       name: 'setting-account',
-  //       meta: {
-  //         title: '个人设置',
-  //       },
-  //       component: () => import('@/views/setting/account/account.vue'),
-  //     },
-  //     {
-  //       path: 'system',
-  //       name: 'setting-system',
-  //       meta: {
-  //         title: '系统设置',
-  //       },
-  //       component: () => import('@/views/setting/system/system.vue'),
-  //     },
-  //   ],
-  // },
+  {
+    path: '/setting',
+    name: 'Setting',
+    redirect: '/setting/system',
+    component: Layout,
+    meta: {
+      title: '系统设置',
+      icon: renderIcon(SettingOutlined),
+      sort: 9,
+    },
+    children: [
+      {
+        path: 'system',
+        name: 'setting-system',
+        meta: {
+          title: '系统设置',
+        },
+        component: () => import('@/views/setting/system/index.vue'),
+      },
+    ],
+  },
 ];
 
 export default routes;

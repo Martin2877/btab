@@ -3,6 +3,7 @@ package httpparse
 import (
 	"encoding/hex"
 	"fmt"
+	"net/textproto"
 	"strconv"
 	"strings"
 )
@@ -66,7 +67,9 @@ func (http_parse *HTTP_PARSE) Req_parse(content string) (map[string]string, map[
 	var result string
 	var url_query map[string]map[string]string
 
-	flag, result, url_query = judge_url_what_type_args("http://www.tophant.com" + http_request.Uri)
+	if http_request.Uri != "" {
+		flag, result, url_query = judge_url_what_type_args("http://localhost" + http_request.Uri)
+	}
 
 	// 存入web访问资源类型
 	if flag {
@@ -99,6 +102,10 @@ func (http_parse *HTTP_PARSE) Req_parse(content string) (map[string]string, map[
 		http_request.UA_type = "未识别到漏扫工具"
 	}
 	fmt.Println(http_request)
+	final_result["req_method"] = http_request.Method
+	final_result["req_uri"] = http_request.Uri
+	final_result["req_host"] = http_request.Req_header_all["Host"]
+	final_result["req_ua_type"] = http_request.UA_type
 	final_result["req_url_type"] = http_request.Req_type.Url_type
 	final_result["req_content_type"] = http_request.Req_type.Content_type
 	final_result["req_client_body_type"] = http_request.Req_type.Client_body_type
@@ -116,7 +123,8 @@ func hex_req(http_request *Req_entity, content string) *Req_entity {
 	form_key := ""
 	magic_num := 0
 	newcontent := strings.Replace(content, "\n", "", -1)
-	temps := strings.Split(newcontent, "0d0a") // 2个0d0a切分,将内容拆分
+	// 统一转为小写后再按 0d0a 切分（hex 解码本身大小写不敏感）
+	temps := strings.Split(strings.ToLower(newcontent), "0d0a")
 	http_request.Formdata.Files = map[string]map[string]string{}
 	file_type_temp := make(map[string]string)
 	for _, temp := range temps {
@@ -127,23 +135,25 @@ func hex_req(http_request *Req_entity, content string) *Req_entity {
 			temp_h := strings.Split(req_what, " ")
 			if Is_Req_Method(temp_h[0]) {
 				http_request.Method = temp_h[0]
-				http_request.Uri = temp_h[1]
+				if len(temp_h) > 1 {
+					http_request.Uri = temp_h[1]
+				}
 				continue
 			}
 			// 请求头信息会包含:
 			if strings.Contains(req_what, ":") {
 				if header_flag > 0 {
 					temp_header := strings.SplitN(req_what, ":", 2)
-					k := temp_header[0]
-					v := strings.Replace(temp_header[1], " ", "", -1)
+					k := textproto.CanonicalMIMEHeaderKey(strings.TrimSpace(temp_header[0]))
+					v := strings.TrimSpace(temp_header[1])
 					http_request.Req_header_all[k] = v
 					continue
 				}
 			}
 			header_flag = 0
 			// 请求体 内容多样,需要根据请求头信息判断,一般不为空
-			if req_what != "" { // 存入原始post数据
-				http_request.Client_body = http_request.Client_body + "" + temp
+			if req_what != "" { // 存入原始post数据（解码后的文本，与 normal_req 一致）
+				http_request.Client_body = http_request.Client_body + "" + req_what
 			}
 			//分析post请求体中的文件信息
 			// 出现WebKitFormBoundary，则表示新的一个输入框出现,相关内容可能需要重置
@@ -237,15 +247,17 @@ func normal_req(http_request *Req_entity, content string) *Req_entity {
 		temp := strings.Split(req_what, " ")
 		if Is_Req_Method(temp[0]) {
 			http_request.Method = temp[0]
-			http_request.Uri = temp[1]
+			if len(temp) > 1 {
+				http_request.Uri = temp[1]
+			}
 			continue
 		}
 		// 请求头信息会包含:
 		if strings.Contains(req_what, ":") {
 			if header_flag > 0 {
-				temp_header := strings.Split(req_what, ":")
-				k := temp_header[0]
-				v := strings.Replace(temp_header[1], " ", "", -1)
+				temp_header := strings.SplitN(req_what, ":", 2)
+				k := textproto.CanonicalMIMEHeaderKey(strings.TrimSpace(temp_header[0]))
+				v := strings.TrimSpace(temp_header[1])
 				http_request.Req_header_all[k] = v
 				continue
 			}

@@ -1,6 +1,9 @@
 package httpparse
 
-import "strings"
+import (
+	"net/textproto"
+	"strings"
+)
 
 type Res_type struct {
 	Content_type  string // 响应头中的类型
@@ -33,9 +36,9 @@ func (http_parse *HTTP_PARSE) Res_parse(content string) map[string]string {
 		// 响应头解析
 		if strings.Contains(res_what, ":") {
 			if header_flag > 0 {
-				temp_header := strings.Split(res_what, ":")
-				k := temp_header[0]
-				v := strings.Replace(temp_header[1], " ", "", -1)
+				temp_header := strings.SplitN(res_what, ":", 2)
+				k := textproto.CanonicalMIMEHeaderKey(strings.TrimSpace(temp_header[0]))
+				v := strings.TrimSpace(temp_header[1])
 				http_response.Res_header_all[k] = v
 				continue
 			}
@@ -58,6 +61,7 @@ func (http_parse *HTTP_PARSE) Res_parse(content string) map[string]string {
 		http_response.Res_type.Res_body_type = judge_content_type(http_response.Res_body)
 	}
 	// 响应内容类型
+	final_result["res_status"] = http_response.status
 	final_result["res_content_type"] = http_response.Res_type.Content_type
 	final_result["res_client_body_type"] = http_response.Res_type.Res_body_type
 	return final_result
@@ -67,7 +71,10 @@ func (http_parse *HTTP_PARSE) Res_parse(content string) map[string]string {
 func Is_Res_status(content string) bool {
 	status_num := []string{"100", "103", "200", "201", "204", "206", "301", "302", "303", "304", "307", "308", "401", "403", "404", "406", "407", "409", "410", "412", "416", "418", "425", "451", "500", "501", "502", "503", "504"} // 状态码
 	s := strings.Split(content, " ")
-	if strings.Contains(s[0], "HTTP") {
+	if len(s) < 2 {
+		return false
+	}
+	if strings.HasPrefix(s[0], "HTTP/") {
 		if get_keywords(status_num, s[1]) != "" {
 			return true
 		}

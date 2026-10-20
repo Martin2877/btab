@@ -2,10 +2,10 @@ package webshell
 
 import (
 	"github.com/Martin2877/blue-team-box/api/msg"
+	localwebshell "github.com/Martin2877/blue-team-box/engine/local/webshell"
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
-	"math"
 )
 
 type TableResult struct {
@@ -28,18 +28,50 @@ func Get(c *gin.Context) {
 		field.Search = arg
 	}
 
+	page, pageSize = msg.NormalizePageParams(page, pageSize)
 	infos := db.GetRiskWebshells(page, pageSize, &field)
-	total := int(db.GetRiskWebshellTotal(&field))
+	total := db.GetRiskWebshellTotal(&field)
 	tableResult := TableResult{Page: page, PageSize: pageSize, List: infos}
-	tableResult.PageCount = int(math.Ceil(float64(total / pageSize)))
+	tableResult.PageCount = msg.PageCount(total, pageSize)
 
 	msg.ResultSuccess(c, tableResult)
 	return
 
 }
 
+// Submit 检测 webshell 仓库中上传的样本文件
 func Submit(c *gin.Context) {
-	msg.ResultFailed(c, "开源版本无此功能")
+	paJson := db.RiskWebshell{}
+	err := c.ShouldBindJSON(&paJson)
+	if err != nil {
+		msg.ResultFailed(c, "参数不合法:"+err.Error())
+		return
+	}
+	paJson.ForeignWebshell = &db.Webshell{}
+	*paJson.ForeignWebshell = db.GetWebshell(paJson.Webshell)
+	if paJson.ForeignWebshell.Id <= 0 {
+		msg.ResultFailed(c, "webshell 不存在")
+		return
+	}
+
+	// 从数据库读取样本内容
+	content, err := paJson.ForeignWebshell.GetContent()
+	if err != nil {
+		msg.ResultFailed(c, "webshell 内容读取失败")
+		return
+	}
+	if len(content) == 0 {
+		msg.ResultFailed(c, "无检测内容")
+		return
+	}
+
+	res := localwebshell.Check(content)
+	paJson.State = db.PAStateFinish
+	paJson.Chain = res.Chain
+	paJson.Code = res.Code
+	paJson.Result = res.Result
+	db.AddRiskWebshell(paJson)
+	msg.ResultSuccess(c, "检测完成")
 	return
 }
 
@@ -47,8 +79,24 @@ type WebshellOnce struct {
 	Webshell string `json:"webshell"`
 }
 
+// SubmitOnce 即时检测粘贴的 webshell 内容
 func SubmitOnce(c *gin.Context) {
-	msg.ResultFailed(c, "开源版本无此功能")
+	paJson := WebshellOnce{}
+	err := c.ShouldBindJSON(&paJson)
+	if err != nil {
+		msg.ResultFailed(c, "参数不合法:"+err.Error())
+		return
+	}
+	if paJson.Webshell == "" {
+		msg.ResultFailed(c, "无检测内容")
+		return
+	}
+	jres, err := localwebshell.SubmitOnce(paJson.Webshell)
+	if err != nil {
+		msg.ResultFailed(c, err.Error())
+		return
+	}
+	msg.ResultSuccess(c, jres)
 	return
 }
 

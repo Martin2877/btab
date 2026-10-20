@@ -94,6 +94,14 @@
           <span>全屏</span>
         </n-tooltip>
       </div>
+      <!--语言切换-->
+      <div class="layout-header-trigger layout-header-trigger-min">
+        <n-dropdown trigger="hover" :options="langOptions" @select="selectLang">
+          <n-icon size="18">
+            <GlobalOutlined />
+          </n-icon>
+        </n-dropdown>
+      </div>
       <!-- 个人中心 -->
       <div class="layout-header-trigger layout-header-trigger-min">
         <n-dropdown trigger="hover" @select="avatarSelect" :options="avatarOptions">
@@ -136,6 +144,9 @@
   import { AsideMenu } from '@/layout/components/Menu';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
   import { websiteConfig } from '@/config/website.config';
+  import { GlobalOutlined } from '@vicons/antd';
+  import { useI18n } from 'vue-i18n';
+  import { setLocale, tt, type AppLocale } from '@/locales';
 
   export default defineComponent({
     name: 'PageHeader',
@@ -198,7 +209,7 @@
         return routerMap.map((item) => {
           const currentMenu = {
             ...item,
-            label: item.meta.title,
+            label: tt(`menu.${item.name}`, item.meta.title),
             key: item.name,
             disabled: item.path === '/',
           };
@@ -320,6 +331,17 @@
         openDrawer();
       }
 
+      // 语言切换
+      const { locale } = useI18n();
+      const langOptions = [
+        { label: '中文', key: 'zh-CN' },
+        { label: 'English', key: 'en-US' },
+      ];
+      const selectLang = (key: AppLocale) => {
+        setLocale(key);
+      };
+      void locale; // 使模板随语言切换重渲染
+
       return {
         ...toRefs(state),
         iconList,
@@ -338,6 +360,8 @@
         getMenuLocation,
         mixMenu,
         websiteConfig,
+        langOptions,
+        selectLang,
       };
     },
   });

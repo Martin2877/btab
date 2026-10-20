@@ -1,81 +1,99 @@
 import { h } from 'vue';
+import { NTag, NEllipsis } from 'naive-ui';
 
-export const columns = [
-  {
-    title: 'id',
-    key: 'id',
-    width: 30,
-  },
-  {
-    title: '参数',
-    key: 'arg',
-    width: 40,
-  },
-  {
-    title: '参数值',
-    key: 'value',
-    width: 100,
-  },
-  {
-    title: '初步判断',
-    key: 'first_judge',
-    width: 80,
-  },
-  {
-    title: '辅助工具',
-    key: 'other',
-    width: 80,
-    render() {
-      return h(
-        'Select',
-        {
-          props: {
-            value: '123',
-            type: 'on',
-          },
-          onClick: ($event) => {
-            if ($event.target.value != '000') {
-              // 后期需要判断url,防止跳转漏洞,暂时不加
-              document.location.href = $event.target.value;
-            }
-          },
-        },
-        [
-          h('option', { value: '000' }, '可选择组件进行深度检测'),
-          h('option', { value: '#/risk/xss' }, 'XSS检测'),
-          h('option', { value: '#/risk/sqli' }, 'SQL注入检测'),
-          h('option', { value: '#/risk/webshell' }, 'Webshell检测'),
-          h('option', { value: '#/risk/bash' }, 'Bash命令检测'),
-        ]
-      );
+// 参数来源位置的标签映射
+const locationMap: Record<string, { label: string; type: string }> = {
+  query: { label: 'Query 参数', type: 'info' },
+  body: { label: 'Body 参数', type: 'warning' },
+  form: { label: '表单字段', type: 'success' },
+  file: { label: '上传文件', type: 'error' },
+};
+
+// 过长内容省略 + 悬浮查看全文
+function ellipsize(content: any, width: number) {
+  return h(
+    NEllipsis,
+    { style: `max-width:${width}px`, tooltip: { width: 460 } },
+    { default: () => String(content ?? '') }
+  );
+}
+
+// 初步判断结果的标签颜色
+function judgeTagType(t: string) {
+  if (!t) return 'default';
+  if (t.includes('可疑') || t.includes('不匹配')) return 'warning';
+  if (t.includes('编码') || t.includes('字符串') || t.includes('文件')) return 'info';
+  return 'default';
+}
+
+// 参数解析表：来源、位置、参数名、原始值、解码值、类型判断
+export function paramColumns() {
+  return [
+    { title: '#', key: '_no', width: 48, render: (_row, index: number) => index + 1 },
+    {
+      title: '请求',
+      key: 'exchange',
+      width: 56,
+      render: (row) => `#${row.exchange}`,
     },
-  },
-  // {
-  //   title: '操作',
-  //   key: 'action',
-  //   width: 50,
-  // },
-];
+    {
+      title: '位置',
+      key: 'location',
+      width: 96,
+      render(row) {
+        const loc = locationMap[row.location] || { label: row.location, type: 'default' };
+        return h(NTag, { size: 'small', bordered: false, type: loc.type as any }, { default: () => loc.label });
+      },
+    },
+    {
+      title: '参数',
+      key: 'name',
+      width: 160,
+      render: (row) => ellipsize(row.name, 180),
+    },
+    {
+      title: '参数值',
+      key: 'value',
+      render: (row) => ellipsize(row.value, 340),
+    },
+    {
+      title: '解码 / 还原',
+      key: 'decoded',
+      render(row) {
+        if (!row.decoded) {
+          return h('span', { style: 'color:#bbb' }, '—');
+        }
+        return ellipsize(row.decoded, 340);
+      },
+    },
+    {
+      title: '初步判断',
+      key: 'type',
+      width: 170,
+      render(row) {
+        return h(
+          NTag,
+          { size: 'small', bordered: false, type: judgeTagType(row.type) as any },
+          { default: () => row.type || '未知' }
+        );
+      },
+    },
+  ];
+}
 
-export const columns_files = [
-  {
-    title: 'id',
-    key: 'id',
-    width: 30,
-  },
-  {
-    title: '文件名',
-    key: 'filename',
-    width: 30,
-  },
-  {
-    title: '文件类型',
-    key: 'filetype',
-    width: 30,
-  },
-  {
-    title: '初步判断',
-    key: 'filefirst_judge',
-    width: 30,
-  },
-];
+// 请求/响应头明细表
+export function headerColumns() {
+  return [
+    {
+      title: 'Header',
+      key: 'name',
+      width: 180,
+      render: (row) => h('span', { class: 'mono' }, row.name),
+    },
+    {
+      title: '值',
+      key: 'value',
+      render: (row) => ellipsize(row.value, 420),
+    },
+  ];
+}

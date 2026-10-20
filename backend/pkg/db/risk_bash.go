@@ -6,25 +6,24 @@ import (
 
 type RiskBASH struct {
 	gorm.Model
-	Id        int     `gorm:"primary_key" json:"id"`
-	State       int     `json:"state"`  // 任务状态
-	Result      string  `json:"result"`
+	Id     int    `gorm:"primary_key" json:"id"`
+	State  int    `json:"state"` // 任务状态
+	Result string `json:"result"`
 
 	Payload        int      `gorm:"column:payload" json:"payload"`
-	ForeignPayload *Payload   `gorm:"foreignKey:Payload"`
+	ForeignPayload *Payload `gorm:"foreignKey:Payload"`
 }
-
 
 type RiskBASHSearchField struct {
-	Search       string
+	Search string
 }
 
-func GetRiskBASH(id int) (riskbash RiskBASH){
+func GetRiskBASH(id int) (riskbash RiskBASH) {
 	GlobalDB.Model(&RiskBASH{}).Where("id = ?", id).First(&riskbash)
 	return
 }
 
-func GetRiskBASHByState(state int) (riskbashs []RiskBASH){
+func GetRiskBASHByState(state int) (riskbashs []RiskBASH) {
 	GlobalDB.Model(&RiskBASH{}).Where("state = ?", state).Find(&riskbashs)
 	return
 }
@@ -44,40 +43,38 @@ func DeleteRiskBASH(id int) bool {
 	return true
 }
 
+func GetRiskBASHs(page int, pageSize int, field *RiskBASHSearchField) (riskbashs []RiskBASH) {
+	db := GlobalDB.Preload("ForeignPayload", func(db *gorm.DB) *gorm.DB {
+		return db.Omit("Content")
+	})
 
-func GetRiskBASHs(page int, pageSize int, field *RiskBASHSearchField) (riskbashs []RiskBASH){
-	db := GlobalDB.Preload("ForeignPayload")
-
-	// 搜索名字、Sha1 或 uid
-	if field.Search != ""{
-		db = db.Where(
-			GlobalDB.Where("ForeignPayload.name like ?", "%"+field.Search+"%"))
+	// 按关联的 payload 文件名搜索（需 Joins，关联表别名为 ForeignPayload）
+	if field.Search != "" {
+		db = db.Joins("ForeignPayload").Where("ForeignPayload.name like ?", "%"+field.Search+"%")
 	}
 	//  分页
 	if page > 0 && pageSize > 0 {
-		db = db.Offset((page - 1) * pageSize).Order("id").Limit(pageSize).Find(&riskbashs)
+		db = db.Offset((page - 1) * pageSize).Order("id").Limit(pageSize)
 	}
+	db.Find(&riskbashs)
 	return
 }
 
-func GetRiskBASHTotal(field *RiskBASHSearchField) (total int64){
+func GetRiskBASHTotal(field *RiskBASHSearchField) (total int64) {
 	db := GlobalDB.Model(&RiskBASH{})
 
-	// 搜索名字、Sha1 或 uid
-	if field.Search != ""{
-		db = db.Where(
-			GlobalDB.Where("name like ?", "%"+field.Search+"%").
-				Or("sha_1 like ?", "%"+field.Search+"%"))
+	// 按关联的 payload 文件名搜索
+	if field.Search != "" {
+		db = db.Joins("ForeignPayload").Where("ForeignPayload.name like ?", "%"+field.Search+"%")
 	}
 	db.Count(&total)
 	return
 }
 
-
 func ExistRiskBASHById(id int) bool {
 	var riskbash RiskBASH
 	GlobalDB.Model(&RiskBASH{}).Where("id = ?", id).First(&riskbash)
-	if riskbash.Id >0 {
+	if riskbash.Id > 0 {
 		return true
 	}
 	return false
@@ -86,7 +83,7 @@ func ExistRiskBASHById(id int) bool {
 func ExistRiskBASHByName(name string) bool {
 	var riskbash RiskBASH
 	GlobalDB.Model(&RiskBASH{}).Where("name = ?", name).First(&riskbash)
-	if riskbash.Id >0 {
+	if riskbash.Id > 0 {
 		return true
 	}
 	return false
@@ -95,7 +92,7 @@ func ExistRiskBASHByName(name string) bool {
 func ExistRiskBASHByState(state int) bool {
 	var riskbash RiskBASH
 	GlobalDB.Model(&RiskBASH{}).Where("state = ?", state).First(&riskbash)
-	if riskbash.Id >0 {
+	if riskbash.Id > 0 {
 		return true
 	}
 	return false

@@ -1,13 +1,9 @@
 package SerializationDumper
 
 import (
-	"bytes"
 	"errors"
-	"github.com/Martin2877/blue-team-box/lib"
+
 	"github.com/Martin2877/blue-team-box/pkg/db"
-	"log"
-	"os/exec"
-	"runtime"
 )
 
 type SerializationDumper struct {
@@ -36,38 +32,24 @@ func (plugin *SerializationDumper) Check() error {
 }
 
 func (plugin *SerializationDumper) Exec() error {
-	var err error
-	var runner string
 	plugin.State = db.StateRunning
-	if runtime.GOOS == "windows" {
-		// windows系统
-		//runner = path.Join(file.GetCurrentAbPathByExecutable(),"lib","javaw.exe")
-		runner = "java"
-	} else {
-		// LINUX系统
-		runner = "java"
-	}
-	library := lib.Library{}
-	jar, err := library.GetSerializationDumperJar()
+	defer func() { plugin.State = db.StateFinish }()
+	data, err := decodeInput(plugin.Content)
 	if err != nil {
-		return err
-	}
-	//fmt.Println("执行命令：", runner, "-jar", jar, plugin.Content)
-	cmd := exec.Command(runner, "-jar", jar, plugin.Content)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err = cmd.Run()
-	if err != nil {
-		plugin.State = db.StateFinish
 		plugin.FinalStatus = db.FinalStatusFailed
-		log.Fatalf("failed to call Run(): %v", err)
 		return err
 	}
-	library.Cleanup()
-	plugin.State = db.StateFinish
+	out, err := Dump(data)
+	if err != nil && out == "" {
+		plugin.FinalStatus = db.FinalStatusFailed
+		return err
+	}
+	if err != nil {
+		// 已解析出部分结构，保留并附带错误信息
+		out += "\n[解析中断] " + err.Error() + "\n"
+	}
 	plugin.FinalStatus = db.FinalStatusSuccess
-	plugin.Result = stdout.String()
+	plugin.Result = out
 	return nil
 }
 

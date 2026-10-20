@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Martin2877/blue-team-box/engine/local/sqli"
-	"github.com/Martin2877/blue-team-box/engine/local/xss"
-	"github.com/Martin2877/blue-team-box/engine/online/bash"
-	"github.com/tidwall/gjson"
 	"regexp"
 	"strconv"
 	"strings"
+
+	localbash "github.com/Martin2877/blue-team-box/engine/local/bash"
+	"github.com/Martin2877/blue-team-box/engine/local/sqli"
+	"github.com/Martin2877/blue-team-box/engine/local/xss"
+	"github.com/tidwall/gjson"
 
 	"github.com/Martin2877/blue-team-box/engine/plugin"
 	"github.com/Martin2877/blue-team-box/pkg/util"
@@ -35,7 +36,7 @@ var SqliEngines = []string{"sqli", "SQLi"}
 var XSSEngines = []string{"xss", "XSS"}
 
 func init() {
-	for p := range plugin.PluginMap {
+	for p := range plugin.MapPluginGlb {
 		PluginEngines = append(PluginEngines, p)
 	}
 }
@@ -52,7 +53,6 @@ type Engines struct {
 	Steps          []*Step           `json:"steps"`
 
 	Plugins    plugin.Plugins `json:"plugin"`
-	Bash       bash.BASH      `json:"bash"`
 	SQLi       sqli.Sqli      `json:"sq_li"`
 	XSS        xss.XSS        `json:"xss"`
 	LastEngine string         `json:"last_engine"`
@@ -149,6 +149,14 @@ func (ins *Engines) LoadQueries(content string) error {
 	return nil
 }
 
+func (ins *Engines) GetEngines() (results []string) {
+	results = append(results, PluginEngines...)
+	results = append(results, SqliEngines[0])
+	results = append(results, XSSEngines[0])
+	results = append(results, BashEngines[0])
+	return
+}
+
 func (ins *Engines) SetEngine(engineTarget string) error {
 	//fmt.Println("设置引擎:", engineTarget)
 	if util.SliceContains(PluginEngines, engineTarget) {
@@ -219,12 +227,18 @@ func (ins *Engines) getFiledValue(v string, i int, value *string) error {
 	// 固定变量可以后续添加
 	switch v {
 	case LastResult:
+		if i <= 0 {
+			return errors.New("第一个步骤无法使用 {{R}} 上一步结果变量")
+		}
 		*value = ins.GetResult(i - 1)
 		return nil
 	}
-	// 提取其中的序号
+	// 提取其中的序号，形如 {{R[0]}}
 	if strings.Contains(v, "[") && strings.Contains(v, "]") {
 		match := reg.FindStringSubmatch(v)
+		if len(match) < 2 {
+			return fmt.Errorf("变量格式有误: %s，应为 {{R[0]}} 形式", v)
+		}
 		atoi, err := strconv.Atoi(match[1])
 		if err != nil {
 			return err
@@ -237,14 +251,13 @@ func (ins *Engines) getFiledValue(v string, i int, value *string) error {
 	}
 	match := reg2.FindStringSubmatch(v)
 	if len(match) == 2 {
-		//fmt.Println(match[1])
 		payload, ok := ins.GlobalPayloads[match[1]]
 		if ok {
 			*value = payload
 			return nil
 		}
 	}
-	return errors.New(fmt.Sprint("设置了 {{}}, 但找不到相关变量", v))
+	return fmt.Errorf("设置了 {{}}, 但找不到相关变量 %s", v)
 }
 
 func (ins *Engines) Run() error {
@@ -290,42 +303,79 @@ func (ins *Engines) Run() error {
 					return err
 				}
 				if k == "content" {
+					var stepResults []string
 					if !gjson.Valid(value) {
-						//fmt.Println("检测 String :",value)
 						jres, err := ins.SQLi.SubmitOnce(value)
 						if err != nil {
 							return err
 						}
-						jresString, _ := json.Marshal(jres) //转换成JSON返回的是byte[]
-						step.Result = string(jresString)
-						return nil
-					}
-					vjson := gjson.Parse(value)
-					switch vjson.Type {
-					case gjson.String:
-						//fmt.Println("检测 String :",value)
-						jres, err := ins.SQLi.SubmitOnce(value)
-						if err != nil {
-							return err
-						}
-						jresString, _ := json.Marshal(jres) //转换成JSON返回的是byte[]
-						step.Result = string(jresString)
-						return nil
-					case gjson.JSON:
-						if !vjson.IsArray() {
-							return errors.New("检测到非字符串、非数组的数据格式，无法处理")
-						}
-						for _, _v := range vjson.Array() {
-							//fmt.Println("检测 JSON：",_v.String())
-							jres, err := ins.SQLi.SubmitOnce(_v.String())
+						jresString, _ := json.Marshal(jres)
+						stepResults = append(stepResults, string(jresString))
+					} else {
+						vjson := gjson.Parse(value)
+						switch vjson.Type {
+						case gjson.String:
+							jres, err := ins.SQLi.SubmitOnce(vjson.String())
 							if err != nil {
 								return err
 							}
-							jresString, _ := json.Marshal(jres) //转换成JSON返回的是byte[]
-							step.Result = string(jresString)
-							return nil
+							jresString, _ := json.Marshal(jres)
+							stepResults = append(stepResults, string(jresString))
+						case gjson.JSON:
+							if !vjson.IsArray() {
+								return errors.New("检测到非字符串、非数组的数据格式，无法处理")
+							}
+							for _, _v := range vjson.Array() {
+								jres, err := ins.SQLi.SubmitOnce(_v.String())
+								if err != nil {
+									return err
+								}
+								jresString, _ := json.Marshal(jres)
+								stepResults = append(stepResults, string(jresString))
+							}
 						}
 					}
+					// 多条结果合并为 JSON 数组，不中断后续 step
+					if len(stepResults) == 1 {
+						step.Result = stepResults[0]
+					} else {
+						step.Result = "[" + strings.Join(stepResults, ",") + "]"
+					}
+				}
+			}
+		case XSSEngine:
+			for k, v := range step.Payloads {
+				if k == EventType {
+					continue
+				}
+				var value string
+				err = ins.getFiledValue(v, i, &value)
+				if err != nil {
+					return err
+				}
+				if k == "content" {
+					jres, err := ins.XSS.SubmitOnce(value)
+					if err != nil {
+						return err
+					}
+					jresString, _ := json.Marshal(jres)
+					step.Result = string(jresString)
+				}
+			}
+		case BashEngine:
+			for k, v := range step.Payloads {
+				if k == EventType {
+					continue
+				}
+				var value string
+				err = ins.getFiledValue(v, i, &value)
+				if err != nil {
+					return err
+				}
+				if k == "content" {
+					jres := localbash.Check(value)
+					jresString, _ := json.Marshal(jres)
+					step.Result = string(jresString)
 				}
 			}
 		}

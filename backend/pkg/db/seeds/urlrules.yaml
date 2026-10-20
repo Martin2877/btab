@@ -1,0 +1,714 @@
+attackregex:
+  - id: 1
+    regex: '.*xwork\.MethodAccessor.*'
+    place: 'url'
+    typename: 'Exploit特征'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: 'Struts2命令执行漏洞攻击'
+
+  - id: 2
+    regex: '.*javascript:.*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '本地利用型XSS攻击'
+
+  - id: 3
+    regex: '.*(onabort|onactivate|onafterprint|onafterupdate|onbeforeactivate|onbeforecopy|onbeforecut|onbeforedeactivate|onbeforeeditfocus|onbeforepaste|onbeforeprint|onbeforeunload|onbeforeupdate|onblur|onbounce|oncellchange|onchange|onclick|oncontextmenu|oncontrol)'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '事件型XSS攻击'
+
+  - id: 4
+    regex: '.*(eval)+(%20)?=.*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '函数可计算某个字符串，并执行其中的的 JavaScript 代码的XSS攻击'
+
+  - id: 5
+    regex: '.*(behaviour)+(%20)?=.*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '反弹型XSS攻击'
+
+  - id: 6
+    regex: '.*(expression)+(%20)?=.*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '表单型XSS攻击'
+
+  - id: 7
+    regex: '.*<.*>.*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在使用html标签进行反射XSS攻击'
+
+  - id: 8
+    regex: '.*and[%20|\\+].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '使用逻辑判断报错进行sql注入攻击'
+
+  - id: 9
+    regex: '.*or%20.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在进行判断sql注入攻击'
+
+  - id: 10
+    regex: '.*xor.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在进行异或判断sql注入'
+
+  - id: 11
+    regex: '.*sleep[(].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在进行延时sql注入'
+
+  - id: 12
+    regex: '.*order.*by.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在查字段数目的sql注入'
+
+  - id: 13
+    regex: '.*[%20|\\+]union.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在联合查询的sql注入'
+
+  - id: 14
+    regex: '.*select[%20|\\+].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '攻击者可能正在进行数据库sql注入'
+
+  - id: 15
+    regex: '.*database.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在爆库进行sql注入'
+
+  - id: 16
+    regex: '.*user[(].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在查询user表中的数据'
+
+  - id: 17
+    regex: '.*version[(].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在查询版本号进行sql注入'
+
+  - id: 18
+    regex: '.*from[%20|\\+].*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在指定查询数据库进行sql注入'
+
+  - id: 19
+    regex: '.*waitfor.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在利用时间差进行sql注入'
+
+  - id: 20
+    regex: '.*(union|select|from).*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在从表中查询数据进行sql注入'
+
+  - id: 21
+    regex: '.*(phpinfo).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '显示PHPinfo.php中的内容代码执行攻击'
+
+  - id: 22
+    regex: '.*(eval).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用eval函数进行代码执行'
+
+  - id: 23
+    regex: '.*(system[(]).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '攻击者调用system函数可调用系统命令'
+
+  - id: 24
+    regex: '.*(passthru).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用passthru()函数来进行代码执行'
+
+  - id: 25
+    regex: '.*(base64_encode).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用base64_encode函数加密进行代码执行'
+
+  - id: 26
+    regex: '.*(base64_decode).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用base64_decode函数解密进行代码执行'
+
+  - id: 27
+    regex: '.*(gzinflate).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用gzinflate函数解密进行代码执行'
+
+  - id: 28
+    regex: '.*(fsockopen).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '调用fsockopen函数可以用来打开一个socket连接'
+
+  - id: 29
+    regex: '.*(stream_socket).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过stream_socket函数通讯进行代码执行'
+
+  - id: 30
+    regex: '.*(echo).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过echo函数输出进行代码执行'
+
+  - id: 31
+    regex: '.*(print).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过print函数输出进行代码执行'
+
+  - id: 32
+    regex: '.*(execute).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '该攻击可以将字符串内容当做命令来执行'
+
+  - id: 33
+    regex: '.*(shell_exec).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过shell_exec函数运行命令进行代码执行'
+
+  - id: 34
+    regex: '.*(file_get_contents).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过file_get_contents函数获取文件信息进行代码执行'
+
+  - id: 35
+    regex: '.*(require).*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过require函数加载js进行代码执行'
+
+  - id: 36
+    regex: '.*xp_cmdshell.*'
+    place: 'url'
+    typename: '代码执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '通过xp_cmdshell函数扩展存储过程将命令字符串作为操作系统命令 shell 执行'
+
+  - id: 37
+    regex: '.*\\.htaccess.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中的htaccess配置文件，可以网页301重定向、自定义404错误页面、改变文件扩展名、允许/阻止特定的用户或者目录的访问、禁止目录列表、配置默认文档等功能'
+
+  - id: 38
+    regex: '.*\\.tar\\.gz.*'
+    place: 'url'
+    typename: '备份文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在读取服务器中的可能存在的备份文件'
+
+  - id: 39
+    regex: '.*\\.log.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中的日志文件'
+
+  - id: 40
+    regex: '.*\\.properties.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中的通用配置文件'
+
+  - id: 41
+    regex: '.*password\\..*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中的密码配置文件'
+
+  - id: 42
+    regex: '.*wwwroot.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中的根目录是否为wwwroot'
+
+  - id: 43
+    regex: '.*backup.rar.*'
+    place: 'url'
+    typename: '备份文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在读取服务器中是否存在backup.rar备份文件'
+
+  - id: 44
+    regex: '.*\\.sql.*'
+    place: 'url'
+    typename: '备份文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在读取服务器中是否存在数据库备份文件'
+
+  - id: 45
+    regex: '.*\\.bak.*'
+    place: 'url'
+    typename: '备份文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在读取服务器中是否存在备份文件'
+
+  - id: 46
+    regex: '.*etc/passwd.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中是否存在passwd文件'
+
+  - id: 47
+    regex: '.*\\.\\./.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中上层目录文件'
+
+  - id: 48
+    regex: '.*\\.ini.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在读取服务器中是否存在服务器配置文件'
+
+  - id: 49
+    regex: '.*\\.conf.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '攻击者正在搜索网站配置文件'
+
+  - id: 50
+    regex: '.*config\\.inc.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '攻击者正在搜索网站配置文件'
+
+  - id: 51
+    regex: '.*WEB-INF.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '攻击者正在搜索网站Web应用程序配置文件'
+
+  - id: 52
+    regex: '.*whoami.*'
+    place: 'url'
+    typename: '命令执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过命令执行查看本用户的信息'
+
+  - id: 53
+    regex: '.*history.*'
+    place: 'url'
+    typename: '命令执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '攻击者通过命令执行查询历史命令'
+
+  - id: 54
+    regex: '.*ipconfig.*'
+    place: 'url'
+    typename: '命令执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过命令执行查询该服务器网卡配置'
+
+  - id: 55
+    regex: '.*tasklist.*'
+    place: 'url'
+    typename: '命令执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过命令执行查询该服务器的所有进程'
+
+  - id: 56
+    regex: '.*ifconfig.*'
+    place: 'url'
+    typename: '命令执行'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过命令执行查询该服务器网卡配置'
+
+  - id: 57
+    regex: '.*/(phpspy|jspspy|aspspy|jspspy|d99|spy)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有大马型木马病毒'
+
+  - id: 58
+    regex: '.*OgnlContext.*'
+    place: 'url'
+    typename: 'Exploit特征'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过Struts2的EXP扫描该网站'
+
+  - id: 59
+    regex: '.*redirect.*'
+    place: 'url'
+    typename: 'Exploit特征'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: 'Struts2漏洞攻击特征'
+
+  - id: 60
+    regex: '.*<!DOCTYPE.*entity.*'
+    place: 'url'
+    typename: 'XXE漏洞'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在查找XML中是否存在XXE漏洞'
+
+  - id: 61
+    regex: '.*xwork\\.MethodAccessor.*'
+    place: 'url'
+    typename: 'Exploit特征'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过Struts2的EXP扫描该网站'
+
+  - id: 62
+    regex: '.*\\.svn.*'
+    place: 'url'
+    typename: '敏感文件'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '查询服务器中是否SVN敏感文件'
+
+  - id: 63
+    regex: '.*information_schema.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在查找该服务器中information_schema表,其中保存着关于MySQL服务器所维护的所有其他数据库的信息。如数据库名，数据库的表，表栏的数据类型与访问权 限等'
+
+  - id: 64
+    regex: '.*into(.*)+(dump|out)file.*'
+    place: 'url'
+    typename: 'SQL注入攻击'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在通过MySQL到处数据库文件'
+
+  - id: 65
+    regex: '.*alert(.*).*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在通过alert函数弹出对话框'
+
+  - id: 66
+    regex: '.*document\\..*'
+    place: 'url'
+    typename: 'XSS跨站脚本攻击'
+    level: 2
+    leveldesc: '中危级别威胁'
+    actiondesc: '正在 查找文档对象 描述当前窗口或指定窗口对象的文档的xss攻击'
+
+  - id: 67
+    regex: '.*Command=FileUpload.*'
+    place: 'url'
+    typename: '文件上传漏洞'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '查找是否存在文件上传漏洞'
+
+  - id: 68
+    regex: '.*/(upload|fileupload)\\.(php|asp|aspx|jsp|do|action).*'
+    place: 'url'
+    typename: '文件上传漏洞'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站可能存在文件上传漏洞，可导致getshell'
+
+  - id: 69
+    regex: '.*include.*'
+    place: 'url'
+    typename: '文件包含漏洞'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '该语句会获取指定文件中存在的所有文本/代码/标记，并复制到使用 include 语句的文件中'
+
+  - id: 70
+    regex: '.*/(down|download|downfile|readfile)\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '文件下载漏洞'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站可能存在文件任意下载漏洞'
+
+  - id: 71
+    regex: '.*\\?(url|link|uri|ru|backurl)=.*'
+    place: 'url'
+    typename: 'URL重定向'
+    level: 1
+    leveldesc: '低危级别威胁'
+    actiondesc: '攻击者把一个URL重定向到另一个URL上去'
+
+  - id: 72
+    regex: '.*/(HTTrack|harvest|audit|dirbuster|pangolin|nmap|sqln|-scan|hydra|Parser|libwww|BBBike|sqlmap|w3af|owasp|Nikto|fimap|havij|PycURL|zmeu|httperf|bench|SF/|netsparker|BabyKrokodil).*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '正在有扫描器进行漏洞扫描'
+
+  - id: 73
+    regex: '.*/(muma|dump|([1-9]\\d{0,2}|0))+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有小马木马病毒，可能被入侵'
+
+  - id: 74
+    regex: '.*/(netspy|)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有网络扫描类木马'
+
+  - id: 75
+    regex: '.*/(cmd)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有命令行木马病毒，可执行命令操作'
+
+  - id: 76
+    regex: '.*/(nc)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有监听类木马病毒，可对网站进行监听'
+
+  - id: 77
+    regex: '.*/(chopper|c|x|shell|out)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有菜刀类木马病毒，可以使用菜刀远程连接'
+
+  - id: 78
+    regex: '.*/(database|sql)+\\.(php|aspx|jsp|asp)+.*'
+    place: 'url'
+    typename: '木马文件'
+    level: 3
+    leveldesc: '高危级别威胁'
+    actiondesc: '网站有数据库类型木马病毒，可以远程连接数据库'
+
+scannerregex:
+  # Bots Pattern '/name-0.0'
+  # HTTrack|harvest|audit|dirbuster|pangolin|nmap|
+
+  - regex: '.*?HTTrack.*?'
+    typename: 'HTTrack'
+
+  - regex: '.*?harvest.*?'
+    typename: 'harvest'
+
+  - regex: '.*?audit.*?'
+    typename: 'audit'
+
+  - regex: '.*?dirbuster.*?'
+    typename: 'dirbuster'
+
+  - regex: '.*?pangolin.*?'
+    typename: 'pangolin'
+
+  - regex: '.*?nmap.*?'
+    typename: 'nmap'
+
+  - regex: '.*sqln.*'
+    typename: 'sqln'
+
+  - regex: '.*-scan.*'
+    typename: '-scan'
+
+  - regex: '.*hydra.*'
+    typename: 'hydra'
+
+  - regex: '.*Parser.*'
+    typename: 'Parser'
+
+  - regex: '.*libwww.*'
+    typename: 'libwww'
+
+  - regex: '.*BBBike.*'
+    typename: 'BBBike'
+
+  - regex: '.*sqlmap.*'
+    typename: 'sqlmap'
+
+  - regex: '.*w3af.*'
+    typename: 'w3af'
+
+  - regex: '.*owasp.*'
+    typename: 'owasp'
+
+  - regex: '.*Nikto.*'
+    typename: 'Nikto'
+
+  - regex: '.*fimap.*'
+    typename: 'fimap'
+
+  - regex: '.*havij.*'
+    typename: 'havij'
+
+  - regex: '.*PycURL.*'
+    typename: 'PycURL'
+
+  - regex: '.*zmeu.*'
+    typename: 'zmeu'
+
+  - regex: '.*httperf.*'
+    typename: 'httperf'
+
+  - regex: '.*bench.*'
+    typename: 'bench'
+
+  - regex: '.*SF/.*'
+    typename: 'SF/'
+
+  - regex: '.*netsparker.*'
+    typename: 'netsparker'
+
+  - regex: '.*BabyKrokodil.*'
+    typename: 'BabyKrokodil'
+
+
+other:
+  # Firefox
+  - regex: '(Fennec)/(\d+)\.(\d+)\.?([ab]?\d+[a-z]*)'
+    place: 'useragent'
+    typename: 'Firefox Mobile'
+
+  - regex: '/name-0.0'
+    place: 'url'
+    typename: 'Bot'

@@ -1,10 +1,10 @@
 <template>
   <NConfigProvider
     v-if="!isLock"
-    :locale="zhCN"
+    :locale="naiveLocale"
     :theme="getDarkTheme"
     :theme-overrides="getThemeOverrides"
-    :date-locale="dateZhCN"
+    :date-locale="naiveDateLocale"
   >
     <AppProvider>
       <RouterView />
@@ -18,7 +18,8 @@
 
 <script lang="ts" setup>
   import { computed, onMounted, onUnmounted } from 'vue';
-  import { zhCN, dateZhCN, darkTheme } from 'naive-ui';
+  import { zhCN, dateZhCN, enUS, dateEnUS, darkTheme } from 'naive-ui';
+  import { useI18n } from 'vue-i18n';
   import { LockScreen } from '@/components/Lockscreen';
   import { AppProvider } from '@/components/Application';
   import { useLockscreenStore } from '@/store/modules/lockscreen';
@@ -51,6 +52,11 @@
   });
 
   const getDarkTheme = computed(() => (designStore.darkTheme ? darkTheme : undefined));
+
+  // naive-ui 组件文案跟随全局语言
+  const { locale } = useI18n();
+  const naiveLocale = computed(() => (locale.value === 'en-US' ? enUS : zhCN));
+  const naiveDateLocale = computed(() => (locale.value === 'en-US' ? dateEnUS : dateZhCN));
 
   let timer;
 

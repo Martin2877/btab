@@ -1,126 +1,80 @@
 package payload
 
 import (
-	"fmt"
+	"io"
+	"mime/multipart"
+
 	"github.com/Martin2877/blue-team-box/api/msg"
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/Martin2877/blue-team-box/pkg/file"
-	files "github.com/Martin2877/blue-team-box/pkg/file"
 	utils "github.com/Martin2877/blue-team-box/pkg/util"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
-	"io"
-	"log"
-	"math"
-	"mime/multipart"
-	"os"
-	"path"
 )
 
-const STORES = "/stores/payload"
+// MaxUploadSize payload 单文件上传上限 10MB
+const MaxUploadSize = 10 << 20
 
-
-
-func Dir() string {
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	return targetDir
-}
-
-func GetDir(c *gin.Context) {
-	msg.ResultSuccess(c,Dir())
-	return
-}
-
-
-
-// @Summary result list
-// @Tags Result
-// @Description 列表
+// @Summary payload upload
+// @Tags Payload
+// @Description 上传 payload 字典，内容压缩存入数据库
 // @Produce  json
 // @Security token
-// @Param page query int true "Page"
-// @Param pagesize query int true "Pagesize"
-// @Param object query db.ResultSearchField false "field"
 // @Success 200 {object} msg.Response
 // @Failure 200 {object} msg.Response
-// @Router /api/v1/result/ [get]
+// @Router /api/stores/payload/upload [post]
 func Upload(c *gin.Context) {
-	// 1、上传文件
-	// FormFile方法会读取参数“upload”后面的文件名，返回值是一个File指针，和一个FileHeader指针，和一个err错误。
 	_file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		//msg.ResultFailed(c,"Bad request")
-		msg.ResultSelfDefined(c,err.Error())
-		return
-	}
-	// header调用Filename方法，就可以得到文件名
-	filename := header.Filename
-	// 创建一个文件，文件名为filename，这里的返回值out也是一个File指针
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	targetFile := path.Join(targetDir,filename)
-
-	if files.Exists(targetFile){
-		msg.ResultSelfDefined(c,"文件已存在")
-		return
-	}
-
-	if db.ExistPayloadByName(filename){
-		msg.ResultSelfDefined(c,"文件已存在")
-		return
-	}
-
-
-	// 创建多层级目录
-	os.MkdirAll(targetDir, os.ModePerm)
-
-	content, err4 := io.ReadAll(_file)
-	if err4 != nil {
-		msg.ResultSelfDefined(c,err4.Error())
+		msg.ResultSelfDefined(c, err.Error())
 		return
 	}
 	defer func(_file multipart.File) {
-		err5 := _file.Close()
-		if err5 != nil {
-			log.Fatalln(err5.Error())
-		}
+		_ = _file.Close()
 	}(_file)
-	file.WriteFileBinary(content,targetFile,false)
 
-
-	payloadSha1 := utils.Sha1f(targetFile)
-	//newTargetFile := path.Join(targetDir,payloadSha1 + path.Ext(targetFile))
-	//fmt.Println(newTargetFile)
-	//err2 := os.Rename(targetFile, newTargetFile)
-	//if err2 != nil {
-	//	msg.ResultSelfDefined(c,err.Error())
-	//	return
-	//}
-
-	// 2、写入数据库
-	payload :=  db.Payload{
-		Name:        filename,
-		Sha1:        payloadSha1,
-		Size:        int(header.Size),
+	filename := file.SafeFileName(header.Filename)
+	if filename == "" {
+		msg.ResultSelfDefined(c, "非法文件名")
+		return
+	}
+	if header.Size > MaxUploadSize {
+		msg.ResultSelfDefined(c, "文件过大")
+		return
+	}
+	if db.ExistPayloadByName(filename) {
+		msg.ResultSelfDefined(c, "文件已存在")
+		return
 	}
 
+	content, err := io.ReadAll(io.LimitReader(_file, MaxUploadSize+1))
+	if err != nil {
+		msg.ResultSelfDefined(c, err.Error())
+		return
+	}
+	if len(content) == 0 || len(content) > MaxUploadSize {
+		msg.ResultSelfDefined(c, "文件为空或过大")
+		return
+	}
+
+	payload := db.Payload{
+		Name:  filename,
+		Sha1:  utils.Sha1Bytes(content),
+		Lines: len(file.SplitLines(content)),
+		Size:  len(content),
+	}
+	payload.SetContent(content)
 	db.AddPayload(payload)
 
-	msg.ResultSuccess(c,"true")
-	return
+	msg.ResultSuccess(c, "true")
 }
-
 
 type TableResult struct {
-	Page int `json:"page"`
-	PageCount int `json:"pageCount"`
-	PageSize int   `json:"pageSize"`
-	List []db.Payload `json:"list"`
+	Page      int          `json:"page"`
+	PageCount int          `json:"pageCount"`
+	PageSize  int          `json:"pageSize"`
+	List      []db.Payload `json:"list"`
 }
-
-
-
 
 // @Summary payload list
 // @Tags Payload
@@ -145,12 +99,13 @@ func Get(c *gin.Context) {
 		field.Search = arg
 	}
 
+	page, pageSize = msg.NormalizePageParams(page, pageSize)
 	payloads := db.GetPayloads(page, pageSize, &field)
-	total := int(db.GetPayloadTotal(&field))
-	tableResult := TableResult{Page: page, PageSize:pageSize,List: payloads}
-	tableResult.PageCount = int(math.Ceil(float64(total / pageSize)))
+	total := db.GetPayloadTotal(&field)
+	tableResult := TableResult{Page: page, PageSize: pageSize, List: payloads}
+	tableResult.PageCount = msg.PageCount(total, pageSize)
 
-	msg.ResultSuccess(c,tableResult)
+	msg.ResultSuccess(c, tableResult)
 	return
 }
 
@@ -165,30 +120,14 @@ func Get(c *gin.Context) {
 // @Router /api/v1/poc/{id}/ [delete]
 func Delete(c *gin.Context) {
 	id := com.StrTo(c.Query("id")).MustInt()
-	filename := c.Query("name")
-	// 创建一个文件，文件名为filename，这里的返回值out也是一个File指针
-	pwd,_ := os.Getwd()
-	targetDir := path.Join(pwd,STORES)
-	targetFile := path.Join(targetDir,filename)
-
 	if db.ExistPayloadById(id) {
-		// 删除文件
-		err := os.Remove(targetFile)
-		if err != nil {
-			msg.ResultFailed(c,err.Error())
-			return
-		}
-		// 删除数据库
+		// 删除数据库记录（内容随记录一起删除）
 		db.DeletePayload(id)
-
-		msg.ResultSuccess(c,"删除成功")
-		return
-	} else {
-		msg.ResultFailed(c,"删除失败")
+		msg.ResultSuccess(c, "删除成功")
 		return
 	}
+	msg.ResultFailed(c, "删除失败")
 }
-
 
 func Detail(c *gin.Context) {
 	field := db.PayloadSearchField{Search: ""}
@@ -201,21 +140,18 @@ func Detail(c *gin.Context) {
 	if arg := c.Query("search"); arg != "" {
 		field.Search = arg
 	}
-	fmt.Println("search",field)
+	page, pageSize = msg.NormalizePageParams(page, pageSize)
 	payloads := db.GetPayloads(page, pageSize, &field)
-	if len(payloads) > 0{
-		pwd,_ := os.Getwd()
-		targetDir := path.Join(pwd,STORES)
-		targetFile := path.Join(targetDir,payloads[0].Name)
-		readFile, err := file.ReadFile(targetFile)
-		if err != nil {
-			msg.ResultFailed(c,"文件读取失败")
-			return
-		}
-		msg.ResultSuccess(c,readFile)
+	if len(payloads) == 0 {
+		msg.ResultFailed(c, "数据库找不到文件")
 		return
 	}
-	msg.ResultFailed(c,"数据库找不到文件")
+	payload := db.GetPayload(payloads[0].Id)
+	content, err := payload.GetContent()
+	if err != nil {
+		msg.ResultFailed(c, "内容解析失败")
+		return
+	}
+	msg.ResultSuccess(c, string(content))
 	return
 }
-

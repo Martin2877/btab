@@ -3,6 +3,7 @@ package httpparse
 import (
 	"encoding/base64"
 	"encoding/csv"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net/url"
@@ -106,17 +107,18 @@ func Judge_arg_value_type(str string) string {
 	if Is_Number(str) {
 		return "纯数字"
 	}
-	if Is_AllLetter(str) {
-		return "纯字母"
-	}
-	if Is_Base64(str) {
-		return "Base64编码内容"
-	}
+	// 先判断哈希格式，再判断Base64（md5/sha1 本身也满足 base64 字符集）
 	if Is_Md5(str) {
 		return "可能为Md5字符串"
 	}
 	if Is_Sha1(str) {
 		return "可能为SHA1字符串"
+	}
+	if Is_Base64(str) {
+		return "Base64编码内容"
+	}
+	if Is_AllLetter(str) {
+		return "纯字母"
 	}
 	if Is_Urlencoded(str) {
 		return "Urlencode编码内容"
@@ -145,8 +147,16 @@ func Is_Md5(str string) bool {
 
 // 判断是否为Base64
 func Is_Base64(str string) bool {
-	_, err := base64.StdEncoding.DecodeString(str)
-	return err == nil
+	// 长度太短、非4倍数的不判定为 base64，避免误报
+	if len(str) < 8 || len(str)%4 != 0 {
+		return false
+	}
+	decoded, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return false
+	}
+	// 往返校验，排除仅是字符集符合的随机字符串
+	return base64.StdEncoding.EncodeToString(decoded) == str
 }
 
 // 判断是否SHA1
@@ -295,15 +305,19 @@ func Read_csv_2_map(filename string) map[string]string {
 	//fs1, err := os.Open(filename)
 	fs1, err := resource.Open(filename)
 	if err != nil {
-		log.Fatalf("can not open the file, err is %+v", err)
+		log.Printf("can not open the file %s, err is %+v", filename, err)
+		return pa
 	}
 	defer fs1.Close()
 	in := csv.NewReader(fs1)
 	content, err := in.ReadAll()
 	if err != nil {
-		fmt.Printf("can not readall, err is %+v", err)
+		log.Printf("can not readall %s, err is %+v", filename, err)
 	}
 	for _, row := range content {
+		if len(row) < 2 {
+			continue
+		}
 		pa[row[0]] = row[1]
 	}
 	return pa
@@ -317,15 +331,19 @@ func Read_csv_2_map_file_type_magic_offset(filename string) map[string][]map[str
 	//fs1, err := os.Open(filename)
 	fs1, err := resource.Open(filename)
 	if err != nil {
-		log.Fatalf("can not open the file, err is %+v", err)
+		log.Printf("can not open the file %s, err is %+v", filename, err)
+		return pa
 	}
 	defer fs1.Close()
 	in := csv.NewReader(fs1)
 	content, err := in.ReadAll()
 	if err != nil {
-		fmt.Printf("can not readall, err is %+v", err)
+		log.Printf("can not readall %s, err is %+v", filename, err)
 	}
 	for _, row := range content {
+		if len(row) < 3 {
+			continue
+		}
 		var identifier []map[string]string
 		_, ok := pa[row[0]]
 		if ok {
@@ -445,10 +463,15 @@ func is_urlencoded(content string) bool {
 	return flag
 }
 
-// 判断是否是HTTP方法
+// 判断是否是HTTP方法（精确匹配第一个 token）
 func Is_Req_Method(str string) bool {
 	method := []string{"GET", "POST", "HEAD", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"}
-	return has_keywords(method, str)
+	for _, m := range method {
+		if str == m {
+			return true
+		}
+	}
+	return false
 }
 
 // 如果匹配到HTTP方法，那么就返回
@@ -467,6 +490,31 @@ func judge_hex_string(content string) bool {
 	newcontent := strings.Replace(content, "\n", "", -1)
 	match, _ := regexp.MatchString(`^[A-Fa-f0-9]+$`, newcontent)
 	return match
+}
+
+// DecodeHex 若内容为纯十六进制文本（如 Wireshark tcp.payload / hex dump 导出），
+// 返回解码后的文本；否则原样返回。兼容空格、换行、冒号分隔的 hex 格式。
+func DecodeHex(content string) string {
+	c := strings.Map(func(r rune) rune {
+		switch {
+		case r >= '0' && r <= '9', r >= 'a' && r <= 'f', r >= 'A' && r <= 'F':
+			return r
+		case r == ' ' || r == '\n' || r == '\r' || r == '\t' || r == ':':
+			return -1
+		}
+		return r
+	}, content)
+	if len(c) < 4 || len(c)%2 != 0 {
+		return content
+	}
+	if match, _ := regexp.MatchString(`^[A-Fa-f0-9]+$`, c); !match {
+		return content
+	}
+	b, err := hex.DecodeString(c)
+	if err != nil {
+		return content
+	}
+	return string(b)
 }
 
 // 判断文件内容和文件类型是否一致

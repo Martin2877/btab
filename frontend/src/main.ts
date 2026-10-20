@@ -4,6 +4,7 @@ import App from './App.vue';
 import router, { setupRouter } from './router';
 import { setupStore } from '@/store';
 import { setupNaive, setupDirectives } from '@/plugins';
+import { setupI18n } from '@/locales';
 import { AppProvider } from '@/components/Application';
 import { VueClipboard } from '@soerenmartius/vue3-clipboard';
 
@@ -22,6 +23,9 @@ async function bootstrap() {
 
   // 注册全局自定义指令，如：v-permission权限指令
   setupDirectives(app);
+
+  // 挂载 i18n（中文/英文，localStorage 持久化）
+  setupI18n(app);
 
   // 注册全局方法，如：app.config.globalProperties.$message = message
   //setupGlobalMethods(app);

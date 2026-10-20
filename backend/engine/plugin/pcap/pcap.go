@@ -3,12 +3,14 @@ package pcap
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+
 	"github.com/Martin2877/blue-team-box/pkg/db"
 	"github.com/Martin2877/blue-team-box/pkg/file"
 	"github.com/Martin2877/blue-team-box/pkg/pcap"
 	"github.com/tidwall/gjson"
-	"os"
-	"path"
 )
 
 const STORES = "/stores/pcap"
@@ -30,23 +32,29 @@ type Pcap struct {
 
 func (plugin *Pcap) Init() {
 	plugin.State = db.StateFree
+	plugin.FinalStatus = 0
 	plugin.File = ""
 	plugin.Fields = []string{}
 	plugin.Condition = ""
+	plugin.Result = ""
 }
 
 func (plugin *Pcap) Set(key string, value interface{}) {
+	str, ok := value.(string)
+	if !ok {
+		return
+	}
 	switch key {
 	case "file":
-		plugin.File = value.(string)
+		plugin.File = str
 	case "fields":
-		fieldsSource := fmt.Sprintf(`{"fields": %s}`, value.(string))
+		fieldsSource := fmt.Sprintf(`{"fields": %s}`, str)
 		fields := gjson.Get(fieldsSource, "fields")
 		for _, v := range fields.Array() {
 			plugin.Fields = append(plugin.Fields, v.String())
 		}
 	case "condition":
-		plugin.Condition = value.(string)
+		plugin.Condition = str
 	}
 }
 
@@ -60,10 +68,12 @@ func (plugin *Pcap) Check() error {
 func (plugin *Pcap) Exec() error {
 	plugin.State = db.StateRunning
 
-	// 处理
+	// 处理：优先使用绝对路径；相对路径则限定在 stores/pcap 目录内解析，防止路径穿越
 	pcaper := pcap.CreatePcaper()
-
-	filePath := path.Join(Dir(), plugin.File)
+	filePath := filepath.Clean(plugin.File)
+	if !filepath.IsAbs(filePath) {
+		filePath = filepath.Join(Dir(), filepath.Base(filePath))
+	}
 	if !file.Exists(filePath) {
 		plugin.State = db.StateFinish
 		plugin.FinalStatus = db.FinalStatusFailed
@@ -87,7 +97,13 @@ func (plugin *Pcap) Exec() error {
 
 	// 加载 json 内容
 	layers := gjson.GetBytes(query, "#._source.layers")
-	plugin.Result = layers.String()
+	result := layers.String()
+	if result == "" {
+		plugin.State = db.StateFinish
+		plugin.FinalStatus = db.FinalStatusFailed
+		return errors.New("pcap 解析结果为空，请检查文件格式与过滤条件")
+	}
+	plugin.Result = result
 	plugin.State = db.StateFinish
 	plugin.FinalStatus = db.FinalStatusSuccess
 	return nil

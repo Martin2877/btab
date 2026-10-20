@@ -4,6 +4,19 @@ import { NIcon, NTag, NBadge } from 'naive-ui';
 import { PageEnum } from '@/enums/pageEnum';
 import { isObject } from './is/index';
 import { cloneDeep } from 'lodash-es';
+import { tt } from '@/locales';
+
+/**
+ * 菜单/路由标题 i18n：按路由 name 查 menu.<name>，无翻译则回退 meta.title
+ */
+function menuLabel(info: any): any {
+  const name = info?.name;
+  const title = info?.meta?.title;
+  if (name && title) {
+    return tt(`menu.${name}`, title);
+  }
+  return title;
+}
 /**
  * render 图标
  * */
@@ -77,7 +90,7 @@ export function generatorMenu(routerMap: Array<any>) {
     const currentMenu = {
       ...info,
       ...info.meta,
-      label: info.meta?.title,
+      label: menuLabel(info),
       key: info.name,
       icon: isRoot ? item.meta?.icon : info.meta?.icon,
     };
@@ -105,7 +118,7 @@ export function generatorMenuMix(routerMap: Array<any>, routerName: string, loca
       const currentMenu = {
         ...info,
         ...info.meta,
-        label: info.meta?.title,
+        label: menuLabel(info),
         key: info.name,
       };
       firstRouter.push(currentMenu);
@@ -126,7 +139,7 @@ export function getChildrenRouter(routerMap: Array<any>) {
     const currentMenu = {
       ...info,
       ...info.meta,
-      label: info.meta?.title,
+      label: menuLabel(info),
       key: info.name,
     };
     // 是否有子菜单，并递归处理

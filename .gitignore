@@ -187,3 +187,14 @@ backend/btab_darwin_amd64
 backend/btab_linux_amd64
 backend/stores
 backend/test
+test.md
+
+
+_dev.md
+release/
+tmp/
+test/
+
+*.exe
+
+backend/btab_*

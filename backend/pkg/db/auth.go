@@ -14,7 +14,11 @@ type Auth struct {
 // CheckAuth checks if authentication information exists
 func CheckAuth(username, password string) (bool, *Auth) {
 	var auth Auth
-	GlobalDB.Select("id").Where(Auth{Username : username, Password : password}).First(&auth)
+	// 空用户名或密码直接拒绝，避免 gorm 结构体条件忽略零值字段造成的绕过
+	if username == "" || password == "" {
+		return false, nil
+	}
+	GlobalDB.Select("id").Where("username = ? AND password = ?", username, password).First(&auth)
 	if auth.Id > 0 {
 		return true, &auth
 	}
@@ -23,6 +27,8 @@ func CheckAuth(username, password string) (bool, *Auth) {
 
 // ResetPassword
 func ResetPassword(id int, newpassword string) {
-	var auth Auth
-	GlobalDB.Model(auth).Where(Auth{Id : id}).Update("password",newpassword)
+	if id <= 0 || newpassword == "" {
+		return
+	}
+	GlobalDB.Model(&Auth{}).Where("id = ?", id).Update("password", newpassword)
 }

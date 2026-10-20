@@ -26,7 +26,6 @@ func TestNewEngines(t *testing.T) {
 |: filter .baz
 |: content {{R[0]}}
 
-
 | sqli
 |: content {{R}}
 `

@@ -2,10 +2,12 @@ package util
 
 import (
 	"crypto/tls"
-	"github.com/Martin2877/blue-team-box/pkg/conf"
 	"net"
 	"time"
+
+	"github.com/Martin2877/blue-team-box/pkg/conf"
 )
+
 // TcpSend 指定目标发送tcp报文，返回结果（仅适用于一次交互即可判断漏洞的场景）
 func TcpSend(targetAddr string, data []byte) ([]byte, error) {
 	tcpTimeout := time.Duration(conf.GlobalConfig.HttpConfig.DailTimeout) * time.Second
@@ -28,16 +30,15 @@ func TcpSend(targetAddr string, data []byte) ([]byte, error) {
 	return buf[:n], nil
 }
 
-
 // TcpSend 指定目标发送tls嵌套的tcp报文，返回结果（仅适用于一次交互即可判断漏洞的场景）
 func TcpTlsSend(targetAddr string, data []byte) ([]byte, error) {
 	tcpTimeout := time.Duration(conf.GlobalConfig.HttpConfig.HttpTimeout) * time.Second
 	conn, err := net.DialTimeout("tcp", targetAddr, tcpTimeout)
-	// add tls
-	conn = net.Conn(tls.Client(conn, &tls.Config{InsecureSkipVerify: true}))
 	if err != nil {
 		return nil, err
 	}
+	// add tls
+	conn = net.Conn(tls.Client(conn, &tls.Config{InsecureSkipVerify: true}))
 	defer conn.Close()
 	_, err = conn.Write(data)
 	if err != nil {

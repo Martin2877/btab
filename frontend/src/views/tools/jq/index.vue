@@ -27,6 +27,7 @@
     />
     <n-space>
       <n-button type="primary" :loading="formBtnLoading" @click="textSubmit">提交</n-button>
+      <n-button @click="fillSample">示例</n-button>
       <n-button @click="resetForm">重置</n-button>
     </n-space>
 
@@ -63,12 +64,14 @@ const formRef: any = ref(null);
 const message = useMessage();
 const formBtnLoading = ref(false);
 
+const samplePayloads = {
+  filter : ".foo.bar",
+  content: "{ \"foo\": { \"bar\": { \"baz\": 123 } } , \"boo\":\"123\"}"
+};
+
 const initialState = {
   plugin: 'jq',
-  payloads: {
-    filter : ".foo.bar",
-    content: "{ \"foo\": { \"bar\": { \"baz\": 123 } } , \"boo\":\"123\"}"
-  },
+  payloads: { ...samplePayloads },
 };
 
 const initialState2 = {
@@ -107,6 +110,12 @@ function textSubmit(e) {
       formBtnLoading.value = false;
     });
   }
+
+function fillSample(){
+  textValue.payloads.content = samplePayloads.content;
+  textValue.payloads.filter = samplePayloads.filter;
+  textSubmit(new Event('submit'));
+}
 
 function resetForm(){
   textValue.payloads.content = "";

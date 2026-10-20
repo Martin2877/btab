@@ -14,10 +14,9 @@ func TestPcap(t *testing.T) {
 	conf.GlobalConfig.PcapAnalyseConfig.TsharkPath = "F:\\1_program\\60_wireshark\\Wireshark\\tshark.exe"
 
 	// 初始化插件
-	plugins := Plugins{}
-	err = plugins.Init("pcap")
+	plugins, err := NewPlugin("pcap")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(err.Error())
 		return
 	}
 	Payloads := map[string]string{
@@ -58,10 +57,9 @@ func TestJQ(t *testing.T) {
 	var err error
 
 	// 初始化插件
-	plugins := Plugins{}
-	err = plugins.Init("jq")
+	plugins, err := NewPlugin("jq")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(err.Error())
 		return
 	}
 	Payloads := map[string]string{

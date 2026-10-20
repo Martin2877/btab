@@ -31,3 +31,39 @@ export function getLicenseDateline() {
       method: 'get',
     });
   }
+
+/**
+ * @description: 获取系统配置（含 tshark 探测状态）
+ */
+export function getSystemConfig() {
+  return http.request({
+    url: '/system/config',
+    method: 'get',
+  });
+}
+
+/**
+ * @description: 在线更新系统配置，body 为 { "yaml路径": 值 }
+ */
+export function updateSystemConfig(data) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/system/config',
+      method: 'post',
+      data,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: 探测 tshark 可用性与候选路径
+ */
+export function getTsharkStatus() {
+  return http.request({
+    url: '/system/tshark',
+    method: 'get',
+  });
+}

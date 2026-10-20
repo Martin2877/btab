@@ -4,21 +4,18 @@ import "gorm.io/gorm"
 
 type Pcap struct {
 	gorm.Model
-	Id       	int         `gorm:"primary_key" json:"id"`
-	Name        string  `gorm:"column:name" json:"name" binding:"required"`
-	Sha1        string   `gorm:"column:sha_1" json:"sha_1"`
-	Size 		int      `json:"size"`
-	Description        string    `json:"description"`
+	Id          int    `gorm:"primary_key" json:"id"`
+	Name        string `gorm:"column:name" json:"name" binding:"required"`
+	Sha1        string `gorm:"column:sha_1" json:"sha_1"`
+	Size        int    `json:"size"`
+	Description string `json:"description"`
 }
-
 
 type PcapSearchField struct {
-	Search       string
+	Search string
 }
 
-
-
-func GetPcap(id int) (pcap Pcap){
+func GetPcap(id int) (pcap Pcap) {
 	GlobalDB.Model(&Pcap{}).Where("id = ?", id).First(&pcap)
 	return
 }
@@ -38,12 +35,11 @@ func DeletePcap(id int) bool {
 	return true
 }
 
-
-func GetPcaps(page int, pageSize int, field *PcapSearchField) (pcaps []Pcap){
+func GetPcaps(page int, pageSize int, field *PcapSearchField) (pcaps []Pcap) {
 	db := GlobalDB.Model(&Pcap{})
 
 	// 搜索名字、Sha1 或 uid
-	if field.Search != ""{
+	if field.Search != "" {
 		db = db.Where(
 			GlobalDB.Where("name like ?", "%"+field.Search+"%").
 				Or("sha_1 like ?", "%"+field.Search+"%"))
@@ -55,11 +51,11 @@ func GetPcaps(page int, pageSize int, field *PcapSearchField) (pcaps []Pcap){
 	return
 }
 
-func GetPcapTotal(field *PcapSearchField) (total int64){
+func GetPcapTotal(field *PcapSearchField) (total int64) {
 	db := GlobalDB.Model(&Pcap{})
 
 	// 搜索名字、Sha1 或 uid
-	if field.Search != ""{
+	if field.Search != "" {
 		db = db.Where(
 			GlobalDB.Where("name like ?", "%"+field.Search+"%").
 				Or("sha_1 like ?", "%"+field.Search+"%"))
@@ -68,11 +64,10 @@ func GetPcapTotal(field *PcapSearchField) (total int64){
 	return
 }
 
-
 func ExistPcapById(id int) bool {
 	var pcap Pcap
 	GlobalDB.Model(&Pcap{}).Where("id = ?", id).First(&pcap)
-	if pcap.Id >0 {
+	if pcap.Id > 0 {
 		return true
 	}
 	return false
@@ -81,16 +76,16 @@ func ExistPcapById(id int) bool {
 func ExistPcapByName(name string) bool {
 	var pcap Pcap
 	GlobalDB.Model(&Pcap{}).Where("name = ?", name).First(&pcap)
-	if pcap.Id >0 {
+	if pcap.Id > 0 {
 		return true
 	}
 	return false
 }
 
-func ExistPcapBySha1(sha1 int) bool {
+func ExistPcapBySha1(sha1 string) bool {
 	var pcap Pcap
 	GlobalDB.Model(&Pcap{}).Where("sha_1 = ?", sha1).First(&pcap)
-	if pcap.Id >0 {
+	if pcap.Id > 0 {
 		return true
 	}
 	return false
