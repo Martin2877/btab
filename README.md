@@ -3,7 +3,7 @@
 ![Github Release](https://img.shields.io/github/v/release/Martin2877/btab.svg)
 ![Github Downloads](https://img.shields.io/github/downloads/martin2877/btab/total)
 
-[BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) is a blue team analysis toolbox focused on attack signature analysis and alert triage. It assists security operators with pcap analysis, HTTP message inspection, web access log analysis, attack payload identification, encrypted traffic decryption and more. The current version ships with a built-in nuclei vulnerability rule engine, a regex-based URL rule engine and an extensible JavaScript behavior-detection script engine. It can be used via the Web UI, the command line, or directly inside Wireshark through the bundled `btab.lua` plugin.
+[BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) is a blue team analysis toolbox focused on attack signature analysis and alert triage. It assists security operators with pcap analysis, HTTP message inspection, web access log analysis, attack payload identification, encrypted traffic decryption and more. It ships as a single binary that works out of the box and can be used via the Web UI, the command line, or directly inside Wireshark through the bundled `btab.lua` plugin.
 
 <a>English</a> - 
 <a href="./README_zh-cn.md">简体中文</a>
@@ -49,39 +49,12 @@
 
 ## Function
 
-The current version includes the following seven functional modules:
-
-### 1. One-click analysis
-
-A unified analysis entry: paste any payload text, upload a pcap file or a web access log (nginx/apache combined/common format). The sample is automatically archived into the threat warehouse, and applicable detection methods (HTTP session reconstruction, behavior detection scripts, nuclei rules, URL rules, cross-session correlation, etc.) are orchestrated and executed asynchronously, producing a structured analysis report (attack chain graph, hit details, per-step timing).
-
-### 2. Threat warehouse
-
-Unified storage and management of pcap files, payloads, webshells, web access logs and nuclei templates. Everything is stored in SQLite, deduplicated by sha1, and file contents can be viewed online. The package ships with built-in example samples (webshell / payload dictionary / access log) and the official nuclei-templates set, imported once on first startup.
-
-### 3. Risk detection
-
-- **Pcap detection**: extracts sessions with tshark and runs multiple detection strategies in parallel (JS behavior scripts, nuclei templates, local engines such as SQLi/XSS), as async tasks with real-time progress and hit details;
-- **HTTP deep analysis**: accepts raw HTTP messages, Wireshark httpstream dumps or hex input, automatically splits multiple request/response pairs, extracts parameter features and identifies risks; it can also synthesize the traffic back into a downloadable pcap file;
-- **Payload detection**: paste any payload and let the system classify the attack type, then run the SQLi, XSS, Webshell, Bash command, Log4j2 JNDI and nuclei signature engines with per-engine details.
-
-### 4. Detection engines
-
-- **Vulnerability detection engine**: online management of nuclei YAML templates — single file upload, zip package import (with automatic recognition of dictionaries, workflows and other resources), online editing and validation, batch enable/disable, and rule debugging;
-- **Behavior detection engine**: detection logic written in JavaScript (executed by the embedded goja runtime). 21 built-in detection strategies — 16 for pcap traffic (antsword malicious upload, CORS misconfiguration, CVE-2020-1957, CVE-2022-21907, directory brute force, FTP brute force, HTTP chunked transfer, ICMP scan, log4j attack, SYN port scan, RDP/3389 communication, shiro550, source code/backup leak, SQL injection, Telnet weak password, webshell upload) and 5 for web access logs (directory brute force, post-scan admin login, injection payload spraying, sensitive file probing, suspicious script/webshell access). Custom scripts can be uploaded to override built-ins, with online debugging support;
-- **URL detection engine**: regex rules matched against URL / User-Agent / Referer with five severity levels. Ships with a built-in ruleset derived from webloghunter (attack signatures, scanner UA detection, misc), and supports online editing, regex validation, batch enable/disable, rules.yaml import and single-value debugging.
-
-### 5. Auxiliary tools
-
-jq, SerializationDumper (Java deserialization dump), Behinder traffic decryption, Godzilla traffic decryption, Shiro rememberMe key detection (with built-in common-key dictionary), Log4j2 lookup parsing and payload variant generation, and an embedded CyberChef.
-
-### 6. Investigation and analysis capabilities
-
-Jupyter + gRPC based extensibility: write python scripts that call engine plugins for analysis — the capabilities can be expanded infinitely (see [Investigation and Analysis Function Description](./investigation/doc/README.md)).
-
-### 7. Wireshark integration
-
-`wireshark/btab.lua` is a Wireshark Lua plugin that calls the BTAB backend over REST API, adding the security detection capabilities Wireshark lacks: per-packet right-click menus (attack detection, HTTP deep parse, payload decoding), whole-capture HTTP flow triage, session-level nuclei detection with cross-frame webshell decryption (Behinder/Antsword/Chopper), and alert annotations written to the packet details tree, Expert Information and `btab.*` display filters. See [Wireshark Plugin Usage](./wireshark/README.md).
+- **One-click analysis**: paste a payload, upload a pcap or a web access log — applicable detection methods are orchestrated automatically and produce a structured report (attack chain, hit details).
+- **Threat warehouse**: unified SQLite storage for pcaps, payloads, webshells, access logs and nuclei templates, deduplicated by sha1; built-in samples and the official nuclei-templates ship with the package.
+- **Risk detection**: parallel multi-strategy pcap detection, deep HTTP message analysis (with pcap synthesis for export), and smart payload identification (SQLi / XSS / Webshell / Bash / Log4j2 etc.).
+- **Detection engines**: nuclei rule engine, JavaScript behavior engine (21 built-in strategies, extensible with custom scripts) and regex URL rule engine — all managed and debugged online.
+- **Auxiliary tools**: Behinder / Godzilla traffic decryption, Shiro rememberMe key detection, Java deserialization parsing, Log4j2 lookup parsing, embedded CyberChef and more.
+- **Extensibility**: jupyter + gRPC investigation plugins ([docs](./investigation/doc/README.md)); Wireshark `btab.lua` plugin for detection right from the packet list ([docs](./wireshark/README.md)).
 
 ## screenshot of functional interface
 
@@ -135,7 +108,7 @@ Jupyter + gRPC based extensibility: write python scripts that call engine plugin
 
 - Configuration
 
-1. Requires tshark dependency, specify the tshark path in the `config.yaml` file, as follows (it can also be edited online in "System Settings", where common install paths are auto-detected):
+1. Pcap analysis requires tshark. Specify its path in `config.yaml` as follows (common install paths are auto-detected at startup, and it can also be edited online in "System Settings"):
 
 ```
 pcapAnalyseConfig:
@@ -143,16 +116,14 @@ pcapAnalyseConfig:
 tsharkPath: C:\Program Files\Wireshark\tshark.exe # win environment
 ```
 
-2. (Optional) Java environment, some functions require the system to have a Java environment.
-
-3. (Optional) Use jupyter notebook related dependencies
+2. (Optional) Use jupyter notebook related dependencies
 
 ```bash
 pip install jupyterlab
 pip install grpcio-tools
 ```
 
-4. (Optional) Wireshark integration: copy `wireshark/btab.lua` into the Wireshark personal plugins directory to analyze captures directly from Wireshark (requires Wireshark >= 4.2). See [wireshark/README.md](./wireshark/README.md).
+3. (Optional) Wireshark integration: copy `wireshark/btab.lua` into the Wireshark personal plugins directory to analyze captures directly from Wireshark (requires Wireshark >= 4.2). See [wireshark/README.md](./wireshark/README.md).
 
 - Execute
 
@@ -279,11 +250,6 @@ type Plugin interface {
    <p> Since the author has been engaged in the security industry, he has been focusing on the field of traffic security analysis, and is also interested in software research and development.
    On the one hand, this project is to share the usual research results and promote exchanges and learning. On the other hand, there is too little communication with the blue team in China. Now there are more red teams. I hope this way can be used to form a blue team. communication group
    </p>
-</details>
-
-<details>
-   <summary>Will this tool be open source? </summary>
-   <p> At best, it can only partially open source. Because of the commercial issues involved, some core detection items within the company are not convenient to open source, but some non-sensitive functional modules can be open sourced as separate projects for learning reference. </p>
 </details>
 
 ## comminicate

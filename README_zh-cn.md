@@ -3,7 +3,9 @@
 ![Github Release](https://img.shields.io/github/v/release/Martin2877/btab.svg)
 ![Github Downloads](https://img.shields.io/github/downloads/martin2877/btab/total)
 
-[BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) 是一个蓝队分析工具箱，专注于攻击特征分析与告警研判。可辅助安全运营人员完成流量包分析、HTTP 报文研判、Web 访问日志分析、攻击载荷识别、加密流量解密等场景。本版本内置 nuclei 漏洞规则引擎、正则 URL 规则引擎与可扩展的 JS 行为检测脚本引擎，提供 Web 界面、命令行两种使用方式，并可通过内置的 `btab.lua` 插件在 Wireshark 中直接调用。
+[BTAB (Blue Team Analyisis Box)](https://github.com/Martin2877/btab) 是一个蓝队分析工具箱，专注于攻击特征分析与告警研判。可辅助安全运营人员完成流量包分析、HTTP 报文研判、Web 访问日志分析、攻击载荷识别、加密流量解密等场景。单文件二进制开箱即用，提供 Web 界面与命令行两种使用方式，并可通过内置的 `btab.lua` 插件在 Wireshark 中直接调用。
+
+感谢AI, 历时3年后，终于能够将大部分思路进行落地实现！🎉之前纯手工开发，很多思路都开发得很艰难，现在通过AI的开发能够实现落地了！目前集成了流量包分析、payload分析、日志分析等，还有nuclei集成、js引擎的实现，提供了一个思路，供大家参考。
 
 <a href="./README.md">English</a> -
 <a>简体中文</a>
@@ -50,39 +52,12 @@
 
 ## 功能
 
-当前版本包含以下七类功能模块：
-
-### 1. 一键分析
-
-统一分析入口：粘贴任意文本载荷、上传 pcap 流量包或 Web 访问日志（nginx/apache combined/common 格式），系统自动归档样本至威胁仓库，并编排适用的检测方式（流量会话梳理、行为检测脚本、nuclei 漏洞规则、URL 规则、跨会话关联等）异步执行，产出结构化分析报告（攻击链路图、检出明细、逐步骤耗时）。
-
-### 2. 威胁仓库
-
-流量包、payload、webshell、web 访问日志、nuclei 模板的统一存储与管理，全部入库 SQLite，按 sha1 去重，支持在线查看文件内容。随包内置示例样本（webshell / 攻击载荷字典 / 访问日志）与官方 nuclei-templates 模板库，首次启动一次性导入。
-
-### 3. 风险检测
-
-- **流量包检测**：基于 tshark 提取会话，多策略并行检测（JS 行为脚本、nuclei 模板、SQLi/XSS 等本地引擎），异步任务 + 实时进度 + 检出详情；
-- **HTTP 深度解析**：支持原始报文 / Wireshark httpstream / hex 多种输入，自动拆分多组请求响应对，提取参数特征并完成风险识别，还可将报文合成 pcap 文件导出；
-- **攻击载荷检测**：粘贴任意载荷智能识别攻击类别，联动 SQLi、XSS、Webshell、Bash 命令、Log4j2 JNDI、nuclei 规则特征等各引擎给出明细结果。
-
-### 4. 检测引擎
-
-- **漏洞检测引擎**：nuclei YAML 模板在线管理，支持单文件上传、zip 模板包导入（自动识别字典 / workflows 等资源）、在线编辑与校验、批量启停、规则调试；
-- **行为检测引擎**：检测逻辑以 JavaScript 编写（goja 运行时执行），内置 21 种检测策略——16 种针对 pcap 流量（蚁剑上传恶意软件、CORS 配置不当、CVE-2020-1957、CVE-2022-21907、目录暴破、FTP 暴力破解、HTTP 分块传输、ICMP 扫描、log4j 攻击、SYN 端口扫描、3389 通信、shiro550、源码/备份文件泄露、SQL 注入、Telnet 弱口令、webshell 上传等），5 种针对 web 访问日志（目录爆破、爆破后登录后台、注入载荷喷洒、敏感文件探测、可疑脚本/webshell 访问），支持上传自定义脚本覆盖同名内置版本、在线调试；
-- **URL 检测引擎**：基于正则的 URL / User-Agent / Referer 特征规则，分 info~critical 五个等级。内置源自 webloghunter 的规则集（攻击特征、扫描器 UA 识别、其他特征），支持在线编辑、正则校验、批量启停、rules.yaml 导入与单值调试。
-
-### 5. 辅助工具
-
-jq、SerializationDumper 反序列化解析、冰蝎流量解密、哥斯拉流量解密、Shiro rememberMe 密钥检测（内置常用密钥字典爆破）、Log4j2 lookup 解析与 payload 变体生成、内嵌 CyberChef。
-
-### 6. 调查分析能力
-
-基于 jupyter + grpc 的扩展能力，可编写 python 脚本调用引擎插件进行分析，理论上可无限扩展（详见[调查分析模块文档](./investigation/doc/README_zh-cn.md)）。
-
-### 7. Wireshark 集成
-
-`wireshark/btab.lua` 是 Wireshark Lua 插件，通过 REST API 调用 BTAB 后端，为 Wireshark 补齐其不具备的安全检测能力：数据包右键菜单（攻击检测、HTTP 深度解析、Payload 解码）、整包 HTTP 流梳理、会话级 nuclei 检测与跨帧 webshell 解密（冰蝎/蚁剑/菜刀），检测结果写入数据包详情树、Expert Information 与 `btab.*` 显示过滤器。详见 [Wireshark 插件使用说明](./wireshark/README.md)。
+- **一键分析**：粘贴载荷文本、上传 pcap 或 Web 访问日志，自动编排适用的检测方式并产出结构化分析报告（攻击链路、检出明细）。
+- **威胁仓库**：pcap / payload / webshell / 访问日志 / nuclei 模板统一入库 SQLite，sha1 去重，随包内置示例样本与官方 nuclei-templates。
+- **风险检测**：流量包多策略并行检测、HTTP 报文深度解析（支持合成 pcap 导出）、攻击载荷智能识别（SQLi / XSS / Webshell / Bash / Log4j2 等）。
+- **检测引擎**：nuclei 漏洞规则引擎、JS 行为检测引擎（内置 21 种策略，支持自定义脚本）、正则 URL 规则引擎，均可在线管理与调试。
+- **辅助工具**：冰蝎 / 哥斯拉流量解密、Shiro rememberMe 密钥检测、Java 反序列化解析、Log4j2 lookup 解析、内嵌 CyberChef 等。
+- **扩展集成**：jupyter + gRPC 调查分析扩展（[文档](./investigation/doc/README_zh-cn.md)）；Wireshark `btab.lua` 插件，右键即可调用检测能力（[文档](./wireshark/README.md)）。
 
 ## 功能界面截图
 
@@ -136,7 +111,7 @@ jq、SerializationDumper 反序列化解析、冰蝎流量解密、哥斯拉流�
 
 - 配置
 
-1. 需要有 tshark 依赖，配置 `config.yaml` 文件中指定 tshark 路径，如下（也可在 Web 界面"系统设置"中在线修改，系统会自动探测常见安装路径）：
+1. 流量包分析功能依赖 tshark，可在 `config.yaml` 中指定路径（通常启动时会自动探测常见安装路径，也可在 Web 界面"系统设置"中在线修改）：
 
 ```
 pcapAnalyseConfig:
@@ -144,16 +119,14 @@ pcapAnalyseConfig:
     tsharkPath: C:\Program Files\Wireshark\tshark.exe # win 环境
 ```
 
-2. (可选) java 环境，部分功能需要系统有 java 环境。
-
-3. (可选) 使用 jupyter notebook 的相关依赖
+2. (可选) 使用 jupyter notebook 的相关依赖
 
 ```bash
 pip install jupyterlab
 pip install grpcio-tools
 ```
 
-4. (可选) Wireshark 集成：将 `wireshark/btab.lua` 复制到 Wireshark 个人插件目录，即可在 Wireshark 中直接分析流量（需 Wireshark >= 4.2）。详见 [wireshark/README.md](./wireshark/README.md)。
+3. (可选) Wireshark 集成：将 `wireshark/btab.lua` 复制到 Wireshark 个人插件目录，即可在 Wireshark 中直接分析流量（需 Wireshark >= 4.2）。详见 [wireshark/README.md](./wireshark/README.md)。
 
 - 执行
 
@@ -279,11 +252,6 @@ type Plugin interface {
   <p> 笔者从事安全行业以来，一直专注于流量安全分析领域，同时也对软件研发感兴趣。
   本项目一方面是分享平时的研究成果，促进交流学习，另一方面是国内对于蓝队这方面的交流太少了，现在都是红队方面较多，希望可以通过这个方式组建一个在蓝队方面研究的交流群体
   </p>
-</details>
-
-<details>
-  <summary>本工具会开源吗？</summary>
-  <p> 至多只能做到部分开源。因为涉及商业问题，有一些公司内部的核心检测项不方便开源，但其中一些非敏感的功能模块可以以单独的项目开源供学习参考。 </p>
 </details>
 
 ## 交流

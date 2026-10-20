@@ -307,7 +307,7 @@ func Decode(c *gin.Context) {
 		}
 	}
 
-	// java 序列化解析（需要 java 环境）
+	// java 序列化解析（纯 Go 实现，无需 java 环境）
 	if enc == "java" {
 		pgs, err := plugin.NewPlugin("SerializationDumper")
 		if err != nil {
